@@ -316,7 +316,7 @@ export default function ZeeshanPortfolio() {
                 <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 p-1 shadow-2xl">
                   <div className="w-full h-full rounded-3xl overflow-hidden">
                     <img
-                      src="/software-engineer-headshot.png"
+                      src="/banner_with_bgc.png"
                       alt="Zeeshan Haider - Senior Software Engineer"
                       className="w-full h-full object-cover"
                     />
@@ -682,21 +682,20 @@ export default function ZeeshanPortfolio() {
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
                     <CardTitle className="group-hover:text-primary transition-colors">{project.title}</CardTitle>
-                    <a
-                      href={project.link || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:scale-110 transition-transform"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:scale-110 transition-transform p-0 hover:bg-primary"
+                      asChild
                     >
                       <a
-                      href={project.link || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:scale-110 transition-transform"
-                    >
-                      <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </a>
-                    </a>
+                        href={project.link || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-white transition-colors" />
+                      </a>
+                    </Button>
                   </div>
                   <CardDescription className="leading-relaxed mb-4">{project.description}</CardDescription>
                   <div className="flex flex-wrap gap-2">
@@ -942,9 +941,8 @@ export default function ZeeshanPortfolio() {
             <div>
               <h3 className="text-2xl font-bold mb-6 text-slate-800">Let's work together</h3>
               <p className="text-slate-600 mb-8 leading-relaxed text-lg">
-                I'm currently relocating to the UAE and actively seeking opportunities as a Senior Laravel Developer,
-                Full-Stack Developer, or Software Engineer. Whether you're looking to build enterprise solutions,
-                modernize legacy applications, or integrate complex systems, I'd love to discuss your project.
+                I'm a dedicated software engineer specializing in backend and full-stack development. Whether you need to build
+                enterprise-grade solutions, modernize legacy applications, or integrate complex systems, I’d love to collaborate and help bring your vision to life.
               </p>
 
               <div className="space-y-6 mb-8">
@@ -1082,9 +1080,7 @@ export default function ZeeshanPortfolio() {
                 </h3>
               </div>
               <p className="text-slate-300 mb-6 leading-relaxed">
-                Senior Software Engineer with 5+ years of experience building scalable web applications and enterprise
-                solutions. Currently relocating to UAE and seeking new opportunities to create impactful digital
-                solutions.
+               Passionate Senior Software Engineer crafting scalable web applications and meaningful digital experiences.
               </p>
               <div className="flex space-x-4">
                 <Button
