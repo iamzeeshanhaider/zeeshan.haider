@@ -17,7 +17,6 @@ import {
   MapPin,
   Github,
   Linkedin,
-  Twitter,
   ExternalLink,
   Calendar,
   Award,
@@ -40,10 +39,103 @@ import {
   Monitor,
 } from "lucide-react"
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
+import { link } from "fs"
 
 export default function ZeeshanPortfolio() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+  })
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+  })
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target
+    setForm({ ...form, [id]: value })
+    // Clear the error for the field being edited
+    if (errors[id as keyof typeof errors]) {
+      setErrors({ ...errors, [id]: "" })
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors = {
+      firstName: "",
+      lastName: "",
+      email: "",
+      subject: "",
+      message: "",
+    }
+    let isValid = true
+
+    if (!form.firstName.trim()) {
+      newErrors.firstName = "First name is required."
+      isValid = false
+    }
+    if (!form.lastName.trim()) {
+      newErrors.lastName = "Last name is required."
+      isValid = false
+    }
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required."
+      isValid = false
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email)) {
+      newErrors.email = "Invalid email address."
+      isValid = false
+    }
+    if (!form.subject.trim()) {
+      newErrors.subject = "Subject is required."
+      isValid = false
+    }
+    if (!form.message.trim()) {
+      newErrors.message = "Message is required."
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!validateForm()) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+
+      if (res.ok) {
+        toast.success("Message sent successfully!")
+        setForm({ firstName: "", lastName: "", email: "", subject: "", message: "" })
+      } else {
+        const errorData = await res.json().catch(() => ({}))
+        toast.error(errorData.error || "Failed to send message.")
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again later.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
@@ -85,15 +177,20 @@ export default function ZeeshanPortfolio() {
                 variant="outline"
                 size="sm"
                 className="hover:bg-blue-600 hover:text-white transition-all duration-300 border-blue-200 text-blue-600 bg-transparent"
+                asChild
               >
-                <Download className="h-4 w-4 mr-2" />
-                Resume
+                <a href="/Zeeshan_Haider.pdf" download>
+                  <Download className="h-4 w-4 mr-2" />
+                  Resume
+                </a>
               </Button>
               <Button
                 size="sm"
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
               >
-                Hire Me
+                <a href="#contact" className="flex items-center">
+                  Let's Connect
+                </a>
               </Button>
             </div>
 
@@ -118,9 +215,11 @@ export default function ZeeshanPortfolio() {
                   </a>
                 ))}
                 <div className="flex space-x-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1 bg-transparent">
-                    <Download className="h-4 w-4 mr-2" />
-                    Resume
+                  <Button variant="outline" size="sm" className="flex-1 bg-transparent" asChild>
+                    <a href="/Zeeshan_Haider.pdf" download>
+                      <Download className="h-4 w-4 mr-2" />
+                      Resume
+                    </a>
                   </Button>
                   <Button size="sm" className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600">
                     Hire Me
@@ -148,7 +247,7 @@ export default function ZeeshanPortfolio() {
             <div className="fade-in-up">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium mb-6">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                Available for opportunities in UAE
+                Available for opportunities
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-balance">
@@ -160,9 +259,10 @@ export default function ZeeshanPortfolio() {
               <p className="text-2xl text-slate-600 mb-4 font-medium">Senior Software Engineer</p>
 
               <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-xl">
-                5+ years of experience building scalable web applications and enterprise solutions across healthcare,
+                {/* 5+ years of experience building scalable web applications and enterprise solutions across healthcare,
                 e-commerce, and SaaS industries. Specialized in PHP, Laravel, Next.js, and modern full-stack
-                development.
+                development. */}
+                With over 5 years of experience in building scalable and high-performing web applications, I specialize in developing enterprise solutions across industries such as healthcare, e-commerce, and SaaS. My expertise lies in PHP, Laravel, Node.js, Nest.js and modern full-stack development, focusing on creating robust backends, intuitive frontends, and seamless user experiences.
               </p>
 
               <div className="flex flex-wrap gap-4 mb-8">
@@ -170,18 +270,22 @@ export default function ZeeshanPortfolio() {
                   size="lg"
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
                 >
-                  View My Work
-                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <a href="#projects" className="flex items-center">
+                    View My Work
+                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </a>
+
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
                   className="hover:bg-blue-600 hover:text-white border-blue-200 text-blue-600 bg-transparent"
                 >
-                  Let's Connect
+                  <a href="#contact" className="flex items-center">
+                    Let's Connect
+                  </a>
                 </Button>
               </div>
-
               <div className="flex space-x-4">
                 <Button
                   variant="ghost"
@@ -189,7 +293,7 @@ export default function ZeeshanPortfolio() {
                   className="hover:bg-blue-100 hover:text-blue-600 hover:scale-110 transition-all duration-300"
                   asChild
                 >
-                  <a href="https://github.com/zeeshan-haider" target="_blank" rel="noopener noreferrer">
+                  <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
                     <Github className="h-5 w-5" />
                   </a>
                 </Button>
@@ -203,13 +307,7 @@ export default function ZeeshanPortfolio() {
                     <Linkedin className="h-5 w-5" />
                   </a>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-blue-100 hover:text-blue-600 hover:scale-110 transition-all duration-300"
-                >
-                  <Twitter className="h-5 w-5" />
-                </Button>
+
               </div>
             </div>
 
@@ -232,7 +330,7 @@ export default function ZeeshanPortfolio() {
                 </div>
 
                 <div className="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20">
-                  <div className="text-2xl font-bold text-indigo-600">100+</div>
+                  <div className="text-2xl font-bold text-indigo-600">30+</div>
                   <div className="text-xs text-slate-600">Projects</div>
                 </div>
 
@@ -252,8 +350,8 @@ export default function ZeeshanPortfolio() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { icon: Briefcase, value: "5+", label: "Years Experience", color: "text-blue-600" },
-              { icon: Code2, value: "100+", label: "Projects Completed", color: "text-indigo-600" },
-              { icon: Users, value: "50+", label: "Happy Clients", color: "text-green-600" },
+              { icon: Code2, value: "30+", label: "Projects Completed", color: "text-indigo-600" },
+              { icon: Users, value: "25+", label: "Happy Clients", color: "text-green-600" },
               { icon: Award, value: "98%", label: "Client Satisfaction", color: "text-purple-600" },
             ].map((stat, index) => (
               <Card
@@ -288,16 +386,24 @@ export default function ZeeshanPortfolio() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <p className="text-slate-600 mb-6 leading-relaxed text-lg">
-                I'm a <strong>Senior Software Engineer</strong> with 5+ years of experience building scalable web
-                applications and enterprise solutions across industries including healthcare, e-commerce, and SaaS.
-                Currently relocating to the UAE and seeking new opportunities to contribute my technical expertise.
+                I'm a <strong>Senior Software Engineer</strong> with over 5 years of experience building scalable web applications and
+                enterprise solutions across industries such as healthcare, e-commerce, and SaaS. I’m passionate about crafting clean,
+                efficient, and maintainable code that powers exceptional digital experiences.
+              </p>
+
+              <p className="text-slate-600 mb-6 leading-relaxed text-lg">
+                Throughout my career, I’ve engineered and delivered CRM and support portal systems that streamlined operations and
+                reduced manual processes by up to 40%. I specialize in integrating payment solutions (Stripe, PayPal) and marketing
+                platforms into enterprise-level applications, ensuring seamless performance and business efficiency.
               </p>
 
               <p className="text-slate-600 mb-8 leading-relaxed text-lg">
-                Throughout my career, I've designed and delivered CRM and support portal systems that streamlined
-                workflows and reduced manual effort by up to 40%. I specialize in integrating payment solutions (Stripe,
-                PayPal) and marketing platforms into enterprise applications.
+                My core expertise includes <strong>Laravel</strong>, <strong>Next.js</strong>, <strong>PHP</strong>, and
+                <strong>JavaScript</strong>, along with hands-on experience in <strong>Docker</strong>, <strong>API Development</strong>,
+                and <strong>Cloud Deployments</strong>. I focus on delivering scalable, secure, and high-performing solutions that drive
+                business growth.
               </p>
+
 
               <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-4 text-slate-800">Core Technologies</h3>
@@ -327,9 +433,14 @@ export default function ZeeshanPortfolio() {
                 </div>
               </div>
 
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg">
-                Download Resume
-                <Download className="h-4 w-4 ml-2 group-hover:translate-y-1 transition-transform" />
+              <Button 
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
+                asChild
+              >
+                <a href="/Zeeshan_Haider.pdf" download>
+                  Download Resume
+                  <Download className="h-4 w-4 ml-2 group-hover:translate-y-1 transition-transform" />
+                </a>
               </Button>
             </div>
 
@@ -373,7 +484,7 @@ export default function ZeeshanPortfolio() {
               {
                 category: "Backend Development",
                 icon: Server,
-                skills: ["PHP", "Laravel", "CodeIgniter", "Node.js", "MySQL", "PostgreSQL"],
+                skills: ["PHP", "Laravel", "CodeIgniter", "Node.js","Nest.js", "MySQL", "PostgreSQL"],
                 color: "from-blue-500 to-blue-600",
               },
               {
@@ -385,13 +496,13 @@ export default function ZeeshanPortfolio() {
               {
                 category: "DevOps & Tools",
                 icon: Settings,
-                skills: ["Docker", "CI/CD", "Jenkins", "AWS S3", "Git", "Linux"],
+                skills: ["Docker", "CI/CD", "Jenkins", "AWS EC2", "AWS S3",  "Git", "Linux"],
                 color: "from-purple-500 to-purple-600",
               },
               {
                 category: "Integrations",
                 icon: Layers,
-                skills: ["Stripe", "PayPal", "SendGrid", "ActiveCampaign", "REST APIs", "GraphQL"],
+                skills: ["Stripe", "PayPal", "SendGrid", "ActiveCampaign", "REST APIs", "GraphQL", "GHL"],
                 color: "from-green-500 to-green-600",
               },
               {
@@ -455,7 +566,7 @@ export default function ZeeshanPortfolio() {
               Services & <span className="gradient-text">Expertise</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              I offer comprehensive frontend development services to help bring your vision to life
+              I offer comprehensive fullstack development services to help bring your vision to life
             </p>
           </div>
 
@@ -469,19 +580,13 @@ export default function ZeeshanPortfolio() {
                 gradient: "from-blue-500 to-cyan-500",
               },
               {
-                icon: Palette,
-                title: "UI/UX Design",
+                icon: Server,
+                title: "Backend Development",
                 description:
-                  "Creating beautiful and intuitive user interfaces that provide exceptional user experiences.",
-                gradient: "from-purple-500 to-pink-500",
+                  "Building secure, scalable, and high-performance backend systems with clean and efficient architecture.",
+                gradient: "from-blue-600 to-indigo-600",
               },
-              {
-                icon: Smartphone,
-                title: "Mobile Development",
-                description:
-                  "Developing cross-platform mobile applications with React Native and progressive web apps.",
-                gradient: "from-green-500 to-emerald-500",
-              },
+              
               {
                 icon: Globe,
                 title: "Web Applications",
@@ -523,7 +628,7 @@ export default function ZeeshanPortfolio() {
       </section>
 
       {/* Projects Section */}
-      <section id="projects" className="py-20 px-4 sm:px-6 lg:px-8">
+      <section id="projects" className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
@@ -537,25 +642,28 @@ export default function ZeeshanPortfolio() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                title: "E-commerce Platform",
-                description: "A full-featured e-commerce platform built with Next.js, Stripe, and Tailwind CSS.",
-                image: "/modern-ecommerce-dashboard.png",
-                tags: ["Next.js", "TypeScript", "Stripe"],
+                title: "Ship2World",
+                description: "Ship2World is a data-driven logistics platform that helps eCommerce sellers ship parcels globally with end-to-end tracking and optimized rates.",
+                link: "https://ship2world.co/",
+                image: "/ship2world_with_bgc.png",
+                tags: ["PHP","Laravel","javascript", "MYSQL", "AWS","Github","Bootstrap", "Amazon","ebay","Etsy","Shopify", "Stripe"],
                 gradient: "from-red-400 to-pink-500",
               },
               {
-                title: "Task Management App",
-                description: "A collaborative task management application with real-time updates and team features.",
-                image: "/dark-task-management-app-interface.jpg",
-                tags: ["React", "Socket.io", "MongoDB"],
+                title: "W-Flotte",
+                description: "W-Flotte offers scenic Rhine cruises, private charters, and event trips in Düsseldorf with onboard dining and entertainment.",
+                image: "/1702020869441_with_bgc.png",
+                link: "https://w-flotte.de/",
+                tags: ["PHP", "Codeignitor","Mysql","javascript", "Bootstrap", "AWS"],
                 gradient: "from-gray-800 to-gray-900",
               },
               {
-                title: "Analytics Dashboard",
+                title: "HBCU 20x20 Application",
                 description:
-                  "A comprehensive analytics dashboard with interactive charts and real-time data visualization.",
-                image: "/analytics-dashboard.png",
-                tags: ["Vue.js", "D3.js", "Node.js"],
+                  "The Application (HBCU 20x20) is a free platform offering thousands of students access to academic and career resources — including job listings, scholarships, mock interviews, and college applications.",
+                image: "/the_application.png",
+                link: "http://theapplication.org/",
+                tags: ["PHP","Laravel","LiveWire", "Mysql", "Javascript", "AWS", "Stripe","Bitbucket"],
                 gradient: "from-teal-400 to-blue-500",
               },
             ].map((project, index) => (
@@ -574,7 +682,21 @@ export default function ZeeshanPortfolio() {
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
                     <CardTitle className="group-hover:text-primary transition-colors">{project.title}</CardTitle>
-                    <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <a
+                      href={project.link || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform"
+                    >
+                      <a
+                      href={project.link || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:scale-110 transition-transform"
+                    >
+                      <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </a>
+                    </a>
                   </div>
                   <CardDescription className="leading-relaxed mb-4">{project.description}</CardDescription>
                   <div className="flex flex-wrap gap-2">
@@ -593,7 +715,7 @@ export default function ZeeshanPortfolio() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          {/* <div className="text-center mt-12">
             <Button
               variant="outline"
               size="lg"
@@ -602,7 +724,7 @@ export default function ZeeshanPortfolio() {
               View All Projects
               <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -629,28 +751,28 @@ export default function ZeeshanPortfolio() {
               <div className="space-y-8">
                 {[
                   {
-                    title: "Senior Frontend Engineer",
-                    company: "TechCorp Inc.",
+                    title: "Senior Laravel Developer",
+                    company: "Techverx",
                     period: "2022 - Present",
                     description:
-                      "Leading frontend development for enterprise applications, mentoring junior developers, and implementing modern development practices.",
-                    skills: ["React", "TypeScript", "Team Lead"],
+                      "Leading backend development for enterprise applications, mentoring junior developers, and implementing modern development practices.",
+                    skills: ["PHP", "Laravel","Codeignitor","Livewire","AWS","Doceker","jenkins","CI/CD", "Team Lead"],
                   },
                   {
-                    title: "Frontend Developer",
-                    company: "StartupXYZ",
-                    period: "2020 - 2022",
+                    title: "Laravel Developer",
+                    company: "Kodex Technologies",
+                    period: "2022 - 2024",
                     description:
                       "Developed responsive web applications and collaborated with design teams to create exceptional user experiences.",
-                    skills: ["Vue.js", "JavaScript", "SCSS"],
+                    skills: ["PHP","Laravel","Api Development","Mysql","Postgres", "JavaScript", "Docker", "AWS","Shippo","Stripe","Paypal","Formio.js" ],
                   },
                   {
-                    title: "Junior Developer",
-                    company: "WebAgency Pro",
-                    period: "2019 - 2020",
+                    title: "PHP Developer",
+                    company: "Dynamic Logix",
+                    period: "2020 - 2022",
                     description:
                       "Started my professional journey building websites and learning modern web development technologies.",
-                    skills: ["HTML/CSS", "jQuery", "WordPress"],
+                    skills: ["PHP","Mysql","HTML/CSS","Bootstrap", "jQuery", "GoogleCloud","Github","Stripe", "ActiveCampaign","Sendgrid" ],
                   },
                 ].map((job, index) => (
                   <div key={index} className="relative pl-8 border-l-2 border-primary/20">
@@ -690,17 +812,9 @@ export default function ZeeshanPortfolio() {
               <div className="space-y-8">
                 {[
                   {
-                    degree: "Master of Computer Science",
-                    school: "Stanford University",
-                    period: "2017 - 2019",
-                    description:
-                      "Specialized in Human-Computer Interaction and Software Engineering. Graduated with honors (GPA: 3.8/4.0).",
-                    achievements: ["HCI", "Software Engineering", "Honors"],
-                  },
-                  {
                     degree: "Bachelor of Computer Science",
-                    school: "UC Berkeley",
-                    period: "2013 - 2017",
+                    school: "Comsats University Islamabad",
+                    period: "2016 - 2020",
                     description:
                       "Foundation in computer science fundamentals, algorithms, and data structures. Active member of the Computer Science Society.",
                     achievements: ["Algorithms", "Data Structures", "CS Society"],
@@ -835,9 +949,9 @@ export default function ZeeshanPortfolio() {
 
               <div className="space-y-6 mb-8">
                 {[
-                  { icon: Mail, label: "Email", value: "zeeshan.haider@example.com" },
-                  { icon: Phone, label: "Phone", value: "+971 XX XXX XXXX" },
-                  { icon: MapPin, label: "Location", value: "Dubai, UAE (Relocating)" },
+                  { icon: Mail, label: "Email", value: "zeeshan.haid3r73@gmail.com" },
+                  { icon: Phone, label: "Phone", value: "+971 58 989 0134" },
+                  { icon: MapPin, label: "Location", value: "26 A street 34 villa Abu Hail Diera, Dubai" },
                 ].map((contact, index) => (
                   <div key={index} className="flex items-center group">
                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
@@ -860,7 +974,7 @@ export default function ZeeshanPortfolio() {
                     className="hover:bg-blue-600 hover:text-white hover:scale-110 transition-all duration-300 border-blue-200 bg-transparent"
                     asChild
                   >
-                    <a href="https://github.com/zeeshan-haider" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
                       <Github className="h-4 w-4" />
                     </a>
                   </Button>
@@ -874,32 +988,28 @@ export default function ZeeshanPortfolio() {
                       <Linkedin className="h-4 w-4" />
                     </a>
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="hover:bg-blue-600 hover:text-white hover:scale-110 transition-all duration-300 border-blue-200 bg-transparent"
-                  >
-                    <Twitter className="h-4 w-4" />
-                  </Button>
+
                 </div>
               </div>
             </div>
 
             <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-2xl">
               <CardContent className="p-8">
-                <form className="space-y-6">
+                <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="firstName" className="block text-sm font-medium text-slate-800 mb-2">
                         First Name
                       </label>
-                      <Input id="firstName" placeholder="John" className="bg-white/50 border-slate-200" />
+                      <Input id="firstName" placeholder="John" value={form.firstName} onChange={handleChange} className={`bg-white/50 border-slate-200 ${errors.firstName ? 'border-red-500' : ''}`} />
+                      {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
                     </div>
                     <div>
                       <label htmlFor="lastName" className="block text-sm font-medium text-slate-800 mb-2">
                         Last Name
                       </label>
-                      <Input id="lastName" placeholder="Doe" className="bg-white/50 border-slate-200" />
+                      <Input id="lastName" placeholder="Doe" value={form.lastName} onChange={handleChange} className={`bg-white/50 border-slate-200 ${errors.lastName ? 'border-red-500' : ''}`} />
+                      {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
                     </div>
                   </div>
 
@@ -911,15 +1021,19 @@ export default function ZeeshanPortfolio() {
                       id="email"
                       type="email"
                       placeholder="john@example.com"
-                      className="bg-white/50 border-slate-200"
+                      value={form.email}
+                      onChange={handleChange}
+                      className={`bg-white/50 border-slate-200 ${errors.email ? 'border-red-500' : ''}`}
                     />
+                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                   </div>
 
                   <div>
                     <label htmlFor="subject" className="block text-sm font-medium text-slate-800 mb-2">
                       Subject
                     </label>
-                    <Input id="subject" placeholder="Project Discussion" className="bg-white/50 border-slate-200" />
+                    <Input id="subject" placeholder="Project Discussion" value={form.subject} onChange={handleChange} className={`bg-white/50 border-slate-200 ${errors.subject ? 'border-red-500' : ''}`} />
+                    {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject}</p>}
                   </div>
 
                   <div>
@@ -929,15 +1043,22 @@ export default function ZeeshanPortfolio() {
                     <Textarea
                       id="message"
                       placeholder="Tell me about your project..."
-                      className="min-h-[120px] bg-white/50 border-slate-200"
+                      value={form.message}
+                      onChange={handleChange}
+                      className={`min-h-[120px] bg-white/50 border-slate-200 ${errors.message ? 'border-red-500' : ''}`}
                     />
+                    {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
+                    disabled={loading}
+                    // className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
+                    className={`
+                              w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg cursor-pointer disabled:cursor-not-allowed
+                            `}
                   >
-                    Send Message
+                    {loading ? "Sending..." : "Send Message"}
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </form>
@@ -972,7 +1093,7 @@ export default function ZeeshanPortfolio() {
                   className="text-slate-300 hover:text-white hover:bg-slate-800"
                   asChild
                 >
-                  <a href="https://github.com/zeeshan-haider" target="_blank" rel="noopener noreferrer">
+                  <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
                     <Github className="h-4 w-4" />
                   </a>
                 </Button>
@@ -986,9 +1107,7 @@ export default function ZeeshanPortfolio() {
                     <Linkedin className="h-4 w-4" />
                   </a>
                 </Button>
-                <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-slate-800">
-                  <Twitter className="h-4 w-4" />
-                </Button>
+
               </div>
             </div>
 

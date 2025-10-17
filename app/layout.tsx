@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
+import { Toaster } from "sonner"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -53,8 +54,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
-      <body>{children}</body>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <body className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50">
+                <Toaster position="top-right" richColors />
+        {children}
+      </body>
     </html>
   )
 }
