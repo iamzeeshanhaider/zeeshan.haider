@@ -88,7 +88,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <head>
         <link rel="canonical" href="https://zeeshanhaider.dev" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -96,9 +96,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="google-site-verification" content="your-verification-code" />
-        <script type="application/ld+json">
-          {`
-            {
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Person",
               "name": "Zeeshan Haider",
@@ -120,9 +121,9 @@ export default function RootLayout({
                 "@type": "CollegeOrUniversity",
                 "name": "Comsats University Islamabad"
               }
-            }
-          `}
-        </script>
+            })
+          }}
+        />
       </head>
       <body className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50">
         <Toaster position="top-right" richColors />

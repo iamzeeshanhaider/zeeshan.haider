@@ -40,7 +40,6 @@ import {
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { link } from "fs"
 
 export default function ZeeshanPortfolio() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -316,8 +315,8 @@ export default function ZeeshanPortfolio() {
                 <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 p-1 shadow-2xl">
                   <div className="w-full h-full rounded-3xl overflow-hidden">
                     <img
-                      src="/banner_with_bgc.png"
-                      alt="Zeeshan Haider - Senior Software Engineer"
+                      src="/software-engineer-headshot.png"
+                      alt="Zeeshan Haider - Senior Software Engineer - Laravel Developer - Api Developer"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -398,8 +397,8 @@ export default function ZeeshanPortfolio() {
               </p>
 
               <p className="text-slate-600 mb-8 leading-relaxed text-lg">
-                My core expertise includes <strong>Laravel</strong>, <strong>Next.js</strong>, <strong>PHP</strong>, and
-                <strong>JavaScript</strong>, along with hands-on experience in <strong>Docker</strong>, <strong>API Development</strong>,
+                My core expertise includes <strong>PHP</strong>, <strong>Laravel</strong>, <strong>Next.js</strong>, <strong>Net.js</strong>, and
+                <strong> JavaScript</strong>, along with hands-on experience in <strong>Docker</strong>, <strong>API Development</strong>,
                 and <strong>Cloud Deployments</strong>. I focus on delivering scalable, secure, and high-performing solutions that drive
                 business growth.
               </p>
@@ -413,6 +412,7 @@ export default function ZeeshanPortfolio() {
                     "Laravel",
                     "CodeIgniter",
                     "Node.js",
+                    "Nest.js",
                     "Next.js",
                     "React",
                     "JavaScript",
@@ -421,6 +421,7 @@ export default function ZeeshanPortfolio() {
                     "Docker",
                     "AWS",
                     "MySQL",
+                    "Postgress",
                   ].map((tech) => (
                     <Badge
                       key={tech}
@@ -652,7 +653,7 @@ export default function ZeeshanPortfolio() {
               {
                 title: "W-Flotte",
                 description: "W-Flotte offers scenic Rhine cruises, private charters, and event trips in Düsseldorf with onboard dining and entertainment.",
-                image: "/1702020869441_with_bgc.png",
+                image: "/W-Flotte.png",
                 link: "https://w-flotte.de/",
                 tags: ["PHP", "Codeignitor","Mysql","javascript", "Bootstrap", "AWS"],
                 gradient: "from-gray-800 to-gray-900",
