@@ -1134,7 +1134,7 @@ export default function ZeeshanPortfolio() {
           </div>
 
           <div className="border-t border-slate-800 pt-8 text-center text-slate-400">
-            <p>&copy; 2024 Zeeshan Haider. All rights reserved. Built with passion and expertise.</p>
+            <p>&copy; 2025 Zeeshan Haider. All rights reserved. Built with passion and expertise.</p>
           </div>
         </div>
       </footer>
