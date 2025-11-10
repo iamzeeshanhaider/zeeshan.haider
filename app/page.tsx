@@ -178,7 +178,7 @@ export default function ZeeshanPortfolio() {
                 className="hover:bg-blue-600 hover:text-white transition-all duration-300 border-blue-200 text-blue-600 bg-transparent"
                 asChild
               >
-                <a href="/Zeeshan_Haider.pdf" download>
+                <a href="/ZeeshanHaider(Full Stack Egineer).pdf" download>
                   <Download className="h-4 w-4 mr-2" />
                   Resume
                 </a>
@@ -215,7 +215,7 @@ export default function ZeeshanPortfolio() {
                 ))}
                 <div className="flex space-x-2 pt-2">
                   <Button variant="outline" size="sm" className="flex-1 bg-transparent" asChild>
-                    <a href="/Zeeshan_Haider.pdf" download>
+                    <a href="/ZeeshanHaider(Full Stack Egineer).pdf" download>
                       <Download className="h-4 w-4 mr-2" />
                       Resume
                     </a>
@@ -438,7 +438,7 @@ export default function ZeeshanPortfolio() {
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
                 asChild
               >
-                <a href="/Zeeshan_Haider.pdf" download>
+                <a href="/ZeeshanHaider(Full Stack Egineer).pdf" download>
                   Download Resume
                   <Download className="h-4 w-4 ml-2 group-hover:translate-y-1 transition-transform" />
                 </a>
@@ -661,10 +661,19 @@ export default function ZeeshanPortfolio() {
               {
                 title: "HBCU 20x20 Application",
                 description:
-                  "The Application (HBCU 20x20) is a free platform offering thousands of students access to academic and career resources — including job listings, scholarships, mock interviews, and college applications.",
+                  "The Application (HBCU 20x20) is a free platform offering thousands of students access to academic and career resources, including job listings, scholarships, mock interviews, and college applications.",
                 image: "/the_application.png",
                 link: "http://theapplication.org/",
                 tags: ["PHP","Laravel","LiveWire", "Mysql", "Javascript", "AWS", "Stripe","Bitbucket"],
+                gradient: "from-teal-400 to-blue-500",
+              },
+              {
+                title: "Framesuite",
+                description:
+                  "A clean, conversion-focused website built for photographers to easily design, price, and order custom wall art layouts with a smooth and guided workflow.",
+                image: "/framesuite.png",
+                link: "https://framesuite.com/",
+                tags: ["PHP","Laravel", "Mysql", "Javascript", "Reacat.js", "Canvas", "AWS","S3", "Stripe","Bitbucket"],
                 gradient: "from-teal-400 to-blue-500",
               },
             ].map((project, index) => (
