@@ -397,7 +397,7 @@ export default function ZeeshanPortfolio() {
               </p>
 
               <p className="text-slate-600 mb-8 leading-relaxed text-lg">
-                My core expertise includes <strong>PHP</strong>, <strong>Laravel</strong>, <strong>Next.js</strong>, <strong>Net.js</strong>, and
+                My core expertise includes <strong>PHP</strong>, <strong>WordPress</strong>, <strong>Laravel</strong>,<strong>CodeIgniter</strong>, <strong>Next.js</strong>, <strong>Net.js</strong>, and
                 <strong> JavaScript</strong>, along with hands-on experience in <strong>Docker</strong>, <strong>API Development</strong>,
                 and <strong>Cloud Deployments</strong>. I focus on delivering scalable, secure, and high-performing solutions that drive
                 business growth.
@@ -409,6 +409,7 @@ export default function ZeeshanPortfolio() {
                 <div className="flex flex-wrap gap-3">
                   {[
                     "PHP",
+                    "WordPress",
                     "Laravel",
                     "CodeIgniter",
                     "Node.js",
@@ -485,7 +486,7 @@ export default function ZeeshanPortfolio() {
               {
                 category: "Backend Development",
                 icon: Server,
-                skills: ["PHP", "Laravel", "CodeIgniter", "Node.js","Nest.js", "MySQL", "PostgreSQL"],
+                skills: ["PHP", "WordPress", "Laravel", "CodeIgniter", "Node.js","Nest.js", "MySQL", "PostgreSQL"],
                 color: "from-blue-500 to-blue-600",
               },
               {
