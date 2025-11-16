@@ -659,6 +659,24 @@ export default function ZeeshanPortfolio() {
                 gradient: "from-gray-800 to-gray-900",
               },
               {
+                title: "RichTV",
+                description:
+                  "A modern trading club website for stock and crypto investors, featuring custom WordPress layouts, live market data widgets, and structured content for news, rich picks, and trading education.",
+                image: "/richtv.png",
+                link: "https://richtv.io/",
+                tags: ["PHP", "WordPress", "MySQL", "JavaScript", "REST API", "TradingView"],
+                gradient: "from-emerald-400 to-sky-500",
+              },
+              {
+                title: "The Apprentice Doctor",
+                description:
+                  "A medical education platform built on WordPress, combining an online academy, articles, and product pages into a cohesive experience for future medical professionals.",
+                image: "/apprentice-doctor.png",
+                link: "https://theapprenticedoctor.com/",
+                tags: ["PHP", "WordPress", "WooCommerce", "MySQL", "JavaScript", "CSS"],
+                gradient: "from-amber-400 to-orange-500",
+              },
+              {
                 title: "HBCU 20x20 Application",
                 description:
                   "The Application (HBCU 20x20) is a free platform offering thousands of students access to academic and career resources, including job listings, scholarships, mock interviews, and college applications.",
@@ -676,6 +694,15 @@ export default function ZeeshanPortfolio() {
                 tags: ["PHP","Laravel", "Mysql", "Javascript", "Reacat.js", "Canvas", "AWS","S3", "Stripe","Bitbucket"],
                 gradient: "from-teal-400 to-blue-500",
               },
+              {
+                title: "AgileMVPs",
+                description:
+                  "A custom WordPress marketing site for an MVP development agency, with fully bespoke layouts, service pages, case studies, and lead capture forms optimized for startup clients.",
+                image: "/agilemvps.png",
+                link: "https://agilemvps.com/",
+                tags: ["PHP", "WordPress", "MySQL", "JavaScript", "CSS", "Responsive Design"],
+                gradient: "from-indigo-400 to-sky-500",
+              }
             ].map((project, index) => (
               <Card
                 key={index}
