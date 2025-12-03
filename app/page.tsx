@@ -178,7 +178,7 @@ export default function ZeeshanPortfolio() {
                 className="hover:bg-blue-600 hover:text-white transition-all duration-300 border-blue-200 text-blue-600 bg-transparent"
                 asChild
               >
-                <a href="/ZeeshanHaider(Full Stack Egineer).pdf" download>
+                <a href="/Zeeshan Haider.pdf" download>
                   <Download className="h-4 w-4 mr-2" />
                   Resume
                 </a>
@@ -215,7 +215,7 @@ export default function ZeeshanPortfolio() {
                 ))}
                 <div className="flex space-x-2 pt-2">
                   <Button variant="outline" size="sm" className="flex-1 bg-transparent" asChild>
-                    <a href="/ZeeshanHaider(Full Stack Egineer).pdf" download>
+                    <a href="/Zeeshan Haider.pdf" download>
                       <Download className="h-4 w-4 mr-2" />
                       Resume
                     </a>
@@ -255,13 +255,15 @@ export default function ZeeshanPortfolio() {
                 </span>
               </h1>
 
-              <p className="text-2xl text-slate-600 mb-4 font-medium">Senior Software Engineer</p>
+              <p className="text-2xl text-slate-600 mb-4 font-medium">Senior Software Engineer (PHP / JavaScript)</p>
 
               <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-xl">
                 {/* 5+ years of experience building scalable web applications and enterprise solutions across healthcare,
                 e-commerce, and SaaS industries. Specialized in PHP, Laravel, Next.js, and modern full-stack
                 development. */}
-                With over 5 years of experience in building scalable and high-performing web applications, I specialize in developing enterprise solutions across industries such as healthcare, e-commerce, and SaaS. My expertise lies in PHP, Laravel, Node.js, Nest.js and modern full-stack development, focusing on creating robust backends, intuitive frontends, and seamless user experiences.
+                {/* With over 5 years of experience in building scalable and high-performing web applications, I specialize in developing enterprise solutions across industries such as healthcare, e-commerce, and SaaS. My expertise lies in PHP, Laravel, Node.js, Nest.js and modern full-stack development, focusing on creating robust backends, intuitive frontends, and seamless user experiences. */}
+                I build scalable web applications, APIs, and platforms using Laravel,  Node.js, React.js, and PostgreSQL.
+                Experience across POS, marketplaces, logistics, and SaaS products.
               </p>
 
               <div className="flex flex-wrap gap-4 mb-8">
@@ -385,22 +387,15 @@ export default function ZeeshanPortfolio() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <p className="text-slate-600 mb-6 leading-relaxed text-lg">
-                I'm a <strong>Senior Software Engineer</strong> with over 5 years of experience building scalable web applications and
-                enterprise solutions across industries such as healthcare, e-commerce, and SaaS. I’m passionate about crafting clean,
-                efficient, and maintainable code that powers exceptional digital experiences.
+                I’m a <strong>Senior Software Engineer</strong> with 5+ years of experience designing and building web applications, APIs, and database-driven systems. My main focus is backend engineering with Laravel/PHP and JavaScript (Node.js, NestJS), combined with modern frontends in Vue.js and React.
               </p>
 
               <p className="text-slate-600 mb-6 leading-relaxed text-lg">
-                Throughout my career, I’ve engineered and delivered CRM and support portal systems that streamlined operations and
-                reduced manual processes by up to 40%. I specialize in integrating payment solutions (Stripe, PayPal) and marketing
-                platforms into enterprise-level applications, ensuring seamless performance and business efficiency.
+              I’ve worked across logistics, healthcare, fintech, POS, and SaaS platforms—designing architectures, optimising performance with Redis caching and query tuning, and implementing secure payment and wallet flows. I’m comfortable owning features end-to-end: from requirements and system design to implementation, testing, deployment, and production troubleshooting.
               </p>
 
               <p className="text-slate-600 mb-8 leading-relaxed text-lg">
-                My core expertise includes <strong>PHP</strong>, <strong>WordPress</strong>, <strong>Laravel</strong>,<strong>CodeIgniter</strong>, <strong>Next.js</strong>, <strong>Net.js</strong>, and
-                <strong> JavaScript</strong>, along with hands-on experience in <strong>Docker</strong>, <strong>API Development</strong>,
-                and <strong>Cloud Deployments</strong>. I focus on delivering scalable, secure, and high-performing solutions that drive
-                business growth.
+                I enjoy leading and mentoring within small teams, reviewing code for quality, and collaborating closely with product, QA, and stakeholders to ship reliable software that solves real business problems.
               </p>
 
 
@@ -412,11 +407,13 @@ export default function ZeeshanPortfolio() {
                     "WordPress",
                     "Laravel",
                     "CodeIgniter",
+                    "JavaScript",
                     "Node.js",
                     "Nest.js",
                     "Next.js",
-                    "React",
-                    "JavaScript",
+                    "React.js",
+                    "Vue.js",
+                    "Livewire",
                     "Bootstrap",
                     "Tailwind",
                     "Docker",
@@ -439,7 +436,7 @@ export default function ZeeshanPortfolio() {
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
                 asChild
               >
-                <a href="/ZeeshanHaider(Full Stack Egineer).pdf" download>
+                <a href="/Zeeshan Haider.pdf" download>
                   Download Resume
                   <Download className="h-4 w-4 ml-2 group-hover:translate-y-1 transition-transform" />
                 </a>
@@ -492,7 +489,7 @@ export default function ZeeshanPortfolio() {
               {
                 category: "Frontend Development",
                 icon: Monitor,
-                skills: ["Next.js", "React", "JavaScript", "TypeScript", "Tailwind CSS", "Bootstrap"],
+                skills: ["Next.js", "React.js","Vue.js", "JavaScript", "TypeScript", "Tailwind CSS", "Bootstrap"],
                 color: "from-indigo-500 to-indigo-600",
               },
               {
@@ -504,7 +501,7 @@ export default function ZeeshanPortfolio() {
               {
                 category: "Integrations",
                 icon: Layers,
-                skills: ["Stripe", "PayPal", "SendGrid", "ActiveCampaign", "REST APIs", "GraphQL", "GHL"],
+                skills: ["Stripe", "PayPal", "SendGrid", "ActiveCampaign", "REST APIs","OLO", "GraphQL", "GHL"],
                 color: "from-green-500 to-green-600",
               },
               {
@@ -788,28 +785,61 @@ export default function ZeeshanPortfolio() {
               <div className="space-y-8">
                 {[
                   {
-                    title: "Senior Laravel Developer",
+                    title: "Senior Software Engineer (LAMP / JavaScript Stack)",
                     company: "Techverx",
-                    period: "2022 - Present",
+                    period: "Apr 2024 – Sep 2025",
                     description:
-                      "Leading backend development for enterprise applications, mentoring junior developers, and implementing modern development practices.",
-                    skills: ["PHP", "Laravel","Codeignitor","Livewire","AWS","Doceker","jenkins","CI/CD", "Team Lead"],
+                      "Owning backend and API development for enterprise SaaS and POS platforms using Laravel and JavaScript.",
+                    skills: ["PHP",
+                        "Laravel",
+                        "CodeIgniter",
+                        "Node.js",
+                        "Livewire",
+                        "AWS",
+                        "Docker",
+                        "Jenkins",
+                        "CI/CD",
+                        "Team Lead"
+                      ],
                   },
                   {
-                    title: "Laravel Developer",
+                    title: "Software Engineer (Laravel / JavaScript)",
                     company: "Kodex Technologies",
-                    period: "2022 - 2024",
+                    period: "Apr 2022 – Mar 2024",
                     description:
-                      "Developed responsive web applications and collaborated with design teams to create exceptional user experiences.",
-                    skills: ["PHP","Laravel","Api Development","Mysql","Postgres", "JavaScript", "Docker", "AWS","Shippo","Stripe","Paypal","Formio.js" ],
+                      "Built payment, marketplace and health platforms with Laravel APIs, JavaScript frontends and cloud deployments.",
+                    skills: ["PHP",
+                            "Laravel",
+                            "API Development",
+                            "MySQL",
+                            "PostgreSQL",
+                            "JavaScript",
+                            "Docker",
+                            "AWS",
+                            "Shippo",
+                            "Stripe",
+                            "PayPal",
+                            "Form.io",
+                          ],
                   },
                   {
                     title: "PHP Developer",
                     company: "Dynamic Logix",
-                    period: "2020 - 2022",
+                    period: "Mar 2020 – Mar 2022",
                     description:
-                      "Started my professional journey building websites and learning modern web development technologies.",
-                    skills: ["PHP","Mysql","HTML/CSS","Bootstrap", "jQuery", "GoogleCloud","Github","Stripe", "ActiveCampaign","Sendgrid" ],
+                      "Delivered custom web solutions for international clients using PHP, MySQL and modern front-end tools.",
+                    skills: [
+                          "PHP",
+                          "MySQL",
+                          "HTML/CSS",
+                          "Bootstrap",
+                          "jQuery",
+                          "Google Cloud",
+                          "GitHub",
+                          "Stripe",
+                          "ActiveCampaign",
+                          "SendGrid",
+                        ],
                   },
                 ].map((job, index) => (
                   <div key={index} className="relative pl-8 border-l-2 border-primary/20">
@@ -985,7 +1015,7 @@ export default function ZeeshanPortfolio() {
 
               <div className="space-y-6 mb-8">
                 {[
-                  { icon: Mail, label: "Email", value: "zeeshan.haid3r73@gmail.com" },
+                  { icon: Mail, label: "Email", value: "zeeshan.haider.engineer@gmail.com" },
                   { icon: Phone, label: "Phone", value: "+971 58 989 0134" },
                   { icon: MapPin, label: "Location", value: "26 A street 34 villa Abu Hail Diera, Dubai" },
                 ].map((contact, index) => (
