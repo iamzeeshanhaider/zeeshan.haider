@@ -1,10 +1,16 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Code2,
   Palette,
@@ -37,37 +43,39 @@ import {
   Settings,
   Cpu,
   Monitor,
-} from "lucide-react"
-import { useState, useEffect } from "react"
-import { toast } from "sonner"
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export default function ZeeshanPortfolio() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [scrollY, setScrollY] = useState(0)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     subject: "",
     message: "",
-  })
+  });
   const [errors, setErrors] = useState({
     firstName: "",
     lastName: "",
     email: "",
     subject: "",
     message: "",
-  })
-  const [loading, setLoading] = useState(false)
+  });
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = e.target
-    setForm({ ...form, [id]: value })
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setForm({ ...form, [id]: value });
     // Clear the error for the field being edited
     if (errors[id as keyof typeof errors]) {
-      setErrors({ ...errors, [id]: "" })
+      setErrors({ ...errors, [id]: "" });
     }
-  }
+  };
 
   const validateForm = () => {
     const newErrors = {
@@ -76,71 +84,77 @@ export default function ZeeshanPortfolio() {
       email: "",
       subject: "",
       message: "",
-    }
-    let isValid = true
+    };
+    let isValid = true;
 
     if (!form.firstName.trim()) {
-      newErrors.firstName = "First name is required."
-      isValid = false
+      newErrors.firstName = "First name is required.";
+      isValid = false;
     }
     if (!form.lastName.trim()) {
-      newErrors.lastName = "Last name is required."
-      isValid = false
+      newErrors.lastName = "Last name is required.";
+      isValid = false;
     }
     if (!form.email.trim()) {
-      newErrors.email = "Email is required."
-      isValid = false
+      newErrors.email = "Email is required.";
+      isValid = false;
     } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email)) {
-      newErrors.email = "Invalid email address."
-      isValid = false
+      newErrors.email = "Invalid email address.";
+      isValid = false;
     }
     if (!form.subject.trim()) {
-      newErrors.subject = "Subject is required."
-      isValid = false
+      newErrors.subject = "Subject is required.";
+      isValid = false;
     }
     if (!form.message.trim()) {
-      newErrors.message = "Message is required."
-      isValid = false
+      newErrors.message = "Message is required.";
+      isValid = false;
     }
 
-    setErrors(newErrors)
-    return isValid
-  }
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
-      })
+      });
 
       if (res.ok) {
-        toast.success("Message sent successfully!")
-        setForm({ firstName: "", lastName: "", email: "", subject: "", message: "" })
+        toast.success("Message sent successfully!");
+        setForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
       } else {
-        const errorData = await res.json().catch(() => ({}))
-        toast.error(errorData.error || "Failed to send message.")
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.error || "Failed to send message.");
       }
     } catch (error) {
-      toast.error("An error occurred. Please try again later.")
+      toast.error("An error occurred. Please try again later.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50">
@@ -159,7 +173,15 @@ export default function ZeeshanPortfolio() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex space-x-8">
-              {["About", "Services", "Skills", "Projects", "Experience", "Testimonials", "Contact"].map((item) => (
+              {[
+                "About",
+                "Services",
+                "Skills",
+                "Projects",
+                "Experience",
+                "Testimonials",
+                "Contact",
+              ].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -194,8 +216,17 @@ export default function ZeeshanPortfolio() {
             </div>
 
             {/* Mobile menu button */}
-            <Button variant="ghost" size="sm" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
 
@@ -203,7 +234,15 @@ export default function ZeeshanPortfolio() {
           {isMenuOpen && (
             <div className="md:hidden py-4 border-t border-slate-200/50">
               <div className="flex flex-col space-y-4">
-                {["About", "Services", "Skills", "Projects", "Experience", "Testimonials", "Contact"].map((item) => (
+                {[
+                  "About",
+                  "Services",
+                  "Skills",
+                  "Projects",
+                  "Experience",
+                  "Testimonials",
+                  "Contact",
+                ].map((item) => (
                   <a
                     key={item}
                     href={`#${item.toLowerCase()}`}
@@ -214,13 +253,21 @@ export default function ZeeshanPortfolio() {
                   </a>
                 ))}
                 <div className="flex space-x-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1 bg-transparent" asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 bg-transparent"
+                    asChild
+                  >
                     <a href="/Zeeshan Haider.pdf" download>
                       <Download className="h-4 w-4 mr-2" />
                       Resume
                     </a>
                   </Button>
-                  <Button size="sm" className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600">
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600"
+                  >
                     Hire Me
                   </Button>
                 </div>
@@ -255,15 +302,18 @@ export default function ZeeshanPortfolio() {
                 </span>
               </h1>
 
-              <p className="text-2xl text-slate-600 mb-4 font-medium">Senior Software Engineer (PHP / JavaScript)</p>
+              <p className="text-2xl text-slate-600 mb-4 font-medium">
+                Senior Software Engineer (PHP / JavaScript)
+              </p>
 
               <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-xl">
                 {/* 5+ years of experience building scalable web applications and enterprise solutions across healthcare,
                 e-commerce, and SaaS industries. Specialized in PHP, Laravel, Next.js, and modern full-stack
                 development. */}
                 {/* With over 5 years of experience in building scalable and high-performing web applications, I specialize in developing enterprise solutions across industries such as healthcare, e-commerce, and SaaS. My expertise lies in PHP, Laravel, Node.js, Nest.js and modern full-stack development, focusing on creating robust backends, intuitive frontends, and seamless user experiences. */}
-                I build scalable web applications, APIs, and platforms using Laravel,  Node.js, React.js, and PostgreSQL.
-                Experience across POS, marketplaces, logistics, and SaaS products.
+                I build scalable web applications, APIs, and platforms using
+                Laravel, Node.js, React.js, and PostgreSQL. Experience across
+                POS, marketplaces, logistics, and SaaS products.
               </p>
 
               <div className="flex flex-wrap gap-4 mb-8">
@@ -275,7 +325,6 @@ export default function ZeeshanPortfolio() {
                     View My Work
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </a>
-
                 </Button>
                 <Button
                   variant="outline"
@@ -294,7 +343,11 @@ export default function ZeeshanPortfolio() {
                   className="hover:bg-blue-100 hover:text-blue-600 hover:scale-110 transition-all duration-300"
                   asChild
                 >
-                  <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://github.com/iamzeeshanhaider"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Github className="h-5 w-5" />
                   </a>
                 </Button>
@@ -304,11 +357,14 @@ export default function ZeeshanPortfolio() {
                   className="hover:bg-blue-100 hover:text-blue-600 hover:scale-110 transition-all duration-300"
                   asChild
                 >
-                  <a href="https://www.linkedin.com/in/zeeshan-haider73/" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://www.linkedin.com/in/zeeshan-haider73/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Linkedin className="h-5 w-5" />
                   </a>
                 </Button>
-
               </div>
             </div>
 
@@ -350,10 +406,30 @@ export default function ZeeshanPortfolio() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: Briefcase, value: "5+", label: "Years Experience", color: "text-blue-600" },
-              { icon: Code2, value: "30+", label: "Projects Completed", color: "text-indigo-600" },
-              { icon: Users, value: "25+", label: "Happy Clients", color: "text-green-600" },
-              { icon: Award, value: "98%", label: "Client Satisfaction", color: "text-purple-600" },
+              {
+                icon: Briefcase,
+                value: "5+",
+                label: "Years Experience",
+                color: "text-blue-600",
+              },
+              {
+                icon: Code2,
+                value: "30+",
+                label: "Projects Completed",
+                color: "text-indigo-600",
+              },
+              {
+                icon: Users,
+                value: "25+",
+                label: "Happy Clients",
+                color: "text-green-600",
+              },
+              {
+                icon: Award,
+                value: "98%",
+                label: "Client Satisfaction",
+                color: "text-purple-600",
+              },
             ].map((stat, index) => (
               <Card
                 key={index}
@@ -361,7 +437,9 @@ export default function ZeeshanPortfolio() {
               >
                 <CardContent className="p-6">
                   <stat.icon className={`h-8 w-8 mx-auto mb-4 ${stat.color}`} />
-                  <div className={`text-3xl font-bold mb-2 ${stat.color}`}>{stat.value}</div>
+                  <div className={`text-3xl font-bold mb-2 ${stat.color}`}>
+                    {stat.value}
+                  </div>
                   <div className="text-sm text-slate-600">{stat.label}</div>
                 </CardContent>
               </Card>
@@ -376,31 +454,46 @@ export default function ZeeshanPortfolio() {
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
               About{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Me</span>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Me
+              </span>
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              Passionate about creating scalable solutions that drive business growth and deliver exceptional user
-              experiences.
+              Passionate about creating scalable solutions that drive business
+              growth and deliver exceptional user experiences.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <p className="text-slate-600 mb-6 leading-relaxed text-lg">
-                I’m a <strong>Senior Software Engineer</strong> with 5+ years of experience designing and building web applications, APIs, and database-driven systems. My main focus is backend engineering with Laravel/PHP and JavaScript (Node.js, NestJS), combined with modern frontends in Vue.js and React.
+                I’m a <strong>Senior Software Engineer</strong> with 5+ years of
+                experience designing and building web applications, APIs, and
+                database-driven systems. My main focus is backend engineering
+                with Laravel/PHP and JavaScript (Node.js, NestJS), combined with
+                modern frontends in Vue.js and React.
               </p>
 
               <p className="text-slate-600 mb-6 leading-relaxed text-lg">
-              I’ve worked across logistics, healthcare, fintech, POS, and SaaS platforms—designing architectures, optimising performance with Redis caching and query tuning, and implementing secure payment and wallet flows. I’m comfortable owning features end-to-end: from requirements and system design to implementation, testing, deployment, and production troubleshooting.
+                I’ve worked across logistics, healthcare, fintech, POS, and SaaS
+                platforms—designing architectures, optimising performance with
+                Redis caching and query tuning, and implementing secure payment
+                and wallet flows. I’m comfortable owning features end-to-end:
+                from requirements and system design to implementation, testing,
+                deployment, and production troubleshooting.
               </p>
 
               <p className="text-slate-600 mb-8 leading-relaxed text-lg">
-                I enjoy leading and mentoring within small teams, reviewing code for quality, and collaborating closely with product, QA, and stakeholders to ship reliable software that solves real business problems.
+                I enjoy leading and mentoring within small teams, reviewing code
+                for quality, and collaborating closely with product, QA, and
+                stakeholders to ship reliable software that solves real business
+                problems.
               </p>
 
-
               <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-slate-800">Core Technologies</h3>
+                <h3 className="text-xl font-semibold mb-4 text-slate-800">
+                  Core Technologies
+                </h3>
                 <div className="flex flex-wrap gap-3">
                   {[
                     "PHP",
@@ -432,7 +525,7 @@ export default function ZeeshanPortfolio() {
                 </div>
               </div>
 
-              <Button 
+              <Button
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
                 asChild
               >
@@ -445,7 +538,11 @@ export default function ZeeshanPortfolio() {
 
             <div className="grid grid-cols-2 gap-6">
               {[
-                { icon: TrendingUp, label: "Workflow Efficiency", value: "40%" },
+                {
+                  icon: TrendingUp,
+                  label: "Workflow Efficiency",
+                  value: "40%",
+                },
                 { icon: Shield, label: "Security Focus", value: "100%" },
                 { icon: Rocket, label: "Project Success", value: "98%" },
                 { icon: Heart, label: "Client Reviews", value: "5★" },
@@ -456,7 +553,9 @@ export default function ZeeshanPortfolio() {
                 >
                   <CardContent className="p-6 text-center">
                     <metric.icon className="h-8 w-8 mx-auto mb-4 text-blue-600" />
-                    <div className="text-2xl font-bold text-blue-600 mb-2">{metric.value}</div>
+                    <div className="text-2xl font-bold text-blue-600 mb-2">
+                      {metric.value}
+                    </div>
                     <div className="text-sm text-slate-600">{metric.label}</div>
                   </CardContent>
                 </Card>
@@ -471,7 +570,9 @@ export default function ZeeshanPortfolio() {
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
               Technical{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Skills</span>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Skills
+              </span>
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
               Comprehensive expertise across the full development stack
@@ -483,31 +584,72 @@ export default function ZeeshanPortfolio() {
               {
                 category: "Backend Development",
                 icon: Server,
-                skills: ["PHP", "WordPress", "Laravel", "CodeIgniter", "Node.js","Nest.js", "MySQL", "PostgreSQL"],
+                skills: [
+                  "PHP",
+                  "WordPress",
+                  "Laravel",
+                  "CodeIgniter",
+                  "Node.js",
+                  "Nest.js",
+                  "MySQL",
+                  "PostgreSQL",
+                ],
                 color: "from-blue-500 to-blue-600",
               },
               {
                 category: "Frontend Development",
                 icon: Monitor,
-                skills: ["Next.js", "React.js","Vue.js", "JavaScript", "TypeScript", "Tailwind CSS", "Bootstrap"],
+                skills: [
+                  "Next.js",
+                  "React.js",
+                  "Vue.js",
+                  "JavaScript",
+                  "TypeScript",
+                  "Tailwind CSS",
+                  "Bootstrap",
+                ],
                 color: "from-indigo-500 to-indigo-600",
               },
               {
                 category: "DevOps & Tools",
                 icon: Settings,
-                skills: ["Docker", "CI/CD", "Jenkins", "AWS EC2", "AWS S3",  "Git", "Linux"],
+                skills: [
+                  "Docker",
+                  "CI/CD",
+                  "Jenkins",
+                  "AWS EC2",
+                  "AWS S3",
+                  "Git",
+                  "Linux",
+                ],
                 color: "from-purple-500 to-purple-600",
               },
               {
                 category: "Integrations",
                 icon: Layers,
-                skills: ["Stripe", "PayPal", "SendGrid", "ActiveCampaign", "REST APIs","OLO", "GraphQL", "GHL"],
+                skills: [
+                  "Stripe",
+                  "PayPal",
+                  "SendGrid",
+                  "ActiveCampaign",
+                  "REST APIs",
+                  "OLO",
+                  "GraphQL",
+                  "GHL",
+                ],
                 color: "from-green-500 to-green-600",
               },
               {
                 category: "Databases",
                 icon: Database,
-                skills: ["MySQL", "PostgreSQL", "MongoDB", "Redis", "Database Design", "Query Optimization"],
+                skills: [
+                  "MySQL",
+                  "PostgreSQL",
+                  "MongoDB",
+                  "Redis",
+                  "Database Design",
+                  "Query Optimization",
+                ],
                 color: "from-orange-500 to-orange-600",
               },
               {
@@ -565,7 +707,8 @@ export default function ZeeshanPortfolio() {
               Services & <span className="gradient-text">Expertise</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              I offer comprehensive fullstack development services to help bring your vision to life
+              I offer comprehensive fullstack development services to help bring
+              your vision to life
             </p>
           </div>
 
@@ -585,23 +728,26 @@ export default function ZeeshanPortfolio() {
                   "Building secure, scalable, and high-performance backend systems with clean and efficient architecture.",
                 gradient: "from-blue-600 to-indigo-600",
               },
-              
+
               {
                 icon: Globe,
                 title: "Web Applications",
-                description: "Full-stack web application development with modern technologies and cloud deployment.",
+                description:
+                  "Full-stack web application development with modern technologies and cloud deployment.",
                 gradient: "from-orange-500 to-red-500",
               },
               {
                 icon: Database,
                 title: "API Integration",
-                description: "Seamless integration with third-party APIs and building custom backend solutions.",
+                description:
+                  "Seamless integration with third-party APIs and building custom backend solutions.",
                 gradient: "from-indigo-500 to-blue-500",
               },
               {
                 icon: Zap,
                 title: "Performance Optimization",
-                description: "Optimizing applications for speed, SEO, and exceptional performance across all devices.",
+                description:
+                  "Optimizing applications for speed, SEO, and exceptional performance across all devices.",
                 gradient: "from-yellow-500 to-orange-500",
               },
             ].map((service, index) => (
@@ -615,7 +761,9 @@ export default function ZeeshanPortfolio() {
                   >
                     <service.icon className="h-8 w-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl group-hover:text-primary transition-colors">{service.title}</CardTitle>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    {service.title}
+                  </CardTitle>
                   <CardDescription className="text-muted-foreground leading-relaxed">
                     {service.description}
                   </CardDescription>
@@ -634,7 +782,8 @@ export default function ZeeshanPortfolio() {
               Featured <span className="gradient-text">Projects</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Here are some of my recent projects that showcase my skills and expertise
+              Here are some of my recent projects that showcase my skills and
+              expertise
             </p>
           </div>
 
@@ -642,18 +791,40 @@ export default function ZeeshanPortfolio() {
             {[
               {
                 title: "Ship2World",
-                description: "Ship2World is a data-driven logistics platform that helps eCommerce sellers ship parcels globally with end-to-end tracking and optimized rates.",
+                description:
+                  "Ship2World is a data-driven logistics platform that helps eCommerce sellers ship parcels globally with end-to-end tracking and optimized rates.",
                 link: "https://ship2world.co/",
                 image: "/ship2world_with_bgc.png",
-                tags: ["PHP","Laravel","javascript", "MYSQL", "AWS","Github","Bootstrap", "Amazon","ebay","Etsy","Shopify", "Stripe"],
+                tags: [
+                  "PHP",
+                  "Laravel",
+                  "javascript",
+                  "MYSQL",
+                  "AWS",
+                  "Github",
+                  "Bootstrap",
+                  "Amazon",
+                  "ebay",
+                  "Etsy",
+                  "Shopify",
+                  "Stripe",
+                ],
                 gradient: "from-red-400 to-pink-500",
               },
               {
                 title: "W-Flotte",
-                description: "W-Flotte offers scenic Rhine cruises, private charters, and event trips in Düsseldorf with onboard dining and entertainment.",
+                description:
+                  "W-Flotte offers scenic Rhine cruises, private charters, and event trips in Düsseldorf with onboard dining and entertainment.",
                 image: "/W-Flotte.png",
                 link: "https://w-flotte.de/",
-                tags: ["PHP", "Codeignitor","Mysql","javascript", "Bootstrap", "AWS"],
+                tags: [
+                  "PHP",
+                  "Codeignitor",
+                  "Mysql",
+                  "javascript",
+                  "Bootstrap",
+                  "AWS",
+                ],
                 gradient: "from-gray-800 to-gray-900",
               },
               {
@@ -662,7 +833,14 @@ export default function ZeeshanPortfolio() {
                   "A modern trading club website for stock and crypto investors, featuring custom WordPress layouts, live market data widgets, and structured content for news, rich picks, and trading education.",
                 image: "/richtv.png",
                 link: "https://richtv.io/",
-                tags: ["PHP", "WordPress", "MySQL", "JavaScript", "REST API", "TradingView"],
+                tags: [
+                  "PHP",
+                  "WordPress",
+                  "MySQL",
+                  "JavaScript",
+                  "REST API",
+                  "TradingView",
+                ],
                 gradient: "from-emerald-400 to-sky-500",
               },
               {
@@ -671,7 +849,14 @@ export default function ZeeshanPortfolio() {
                   "A medical education platform built on WordPress, combining an online academy, articles, and product pages into a cohesive experience for future medical professionals.",
                 image: "/apprentice-doctor.png",
                 link: "https://theapprenticedoctor.com/",
-                tags: ["PHP", "WordPress", "WooCommerce", "MySQL", "JavaScript", "CSS"],
+                tags: [
+                  "PHP",
+                  "WordPress",
+                  "WooCommerce",
+                  "MySQL",
+                  "JavaScript",
+                  "CSS",
+                ],
                 gradient: "from-amber-400 to-orange-500",
               },
               {
@@ -680,7 +865,16 @@ export default function ZeeshanPortfolio() {
                   "The Application (HBCU 20x20) is a free platform offering thousands of students access to academic and career resources, including job listings, scholarships, mock interviews, and college applications.",
                 image: "/the_application.png",
                 link: "http://theapplication.org/",
-                tags: ["PHP","Laravel","LiveWire", "Mysql", "Javascript", "AWS", "Stripe","Bitbucket"],
+                tags: [
+                  "PHP",
+                  "Laravel",
+                  "LiveWire",
+                  "Mysql",
+                  "Javascript",
+                  "AWS",
+                  "Stripe",
+                  "Bitbucket",
+                ],
                 gradient: "from-teal-400 to-blue-500",
               },
               {
@@ -689,7 +883,18 @@ export default function ZeeshanPortfolio() {
                   "A clean, conversion-focused website built for photographers to easily design, price, and order custom wall art layouts with a smooth and guided workflow.",
                 image: "/framesuite.png",
                 link: "https://framesuite.com/",
-                tags: ["PHP","Laravel", "Mysql", "Javascript", "Reacat.js", "Canvas", "AWS","S3", "Stripe","Bitbucket"],
+                tags: [
+                  "PHP",
+                  "Laravel",
+                  "Mysql",
+                  "Javascript",
+                  "Reacat.js",
+                  "Canvas",
+                  "AWS",
+                  "S3",
+                  "Stripe",
+                  "Bitbucket",
+                ],
                 gradient: "from-teal-400 to-blue-500",
               },
               {
@@ -698,15 +903,24 @@ export default function ZeeshanPortfolio() {
                   "A custom WordPress marketing site for an MVP development agency, with fully bespoke layouts, service pages, case studies, and lead capture forms optimized for startup clients.",
                 image: "/agilemvps.png",
                 link: "https://agilemvps.com/",
-                tags: ["PHP", "WordPress", "MySQL", "JavaScript", "CSS", "Responsive Design"],
+                tags: [
+                  "PHP",
+                  "WordPress",
+                  "MySQL",
+                  "JavaScript",
+                  "CSS",
+                  "Responsive Design",
+                ],
                 gradient: "from-indigo-400 to-sky-500",
-              }
+              },
             ].map((project, index) => (
               <Card
                 key={index}
                 className="group hover:shadow-2xl transition-all duration-500 hover:scale-105 glass-card border-0 overflow-hidden"
               >
-                <div className={`aspect-video bg-gradient-to-br ${project.gradient} overflow-hidden relative`}>
+                <div
+                  className={`aspect-video bg-gradient-to-br ${project.gradient} overflow-hidden relative`}
+                >
                   <img
                     src={project.image || "/placeholder.svg"}
                     alt={project.title}
@@ -716,7 +930,9 @@ export default function ZeeshanPortfolio() {
                 </div>
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
-                    <CardTitle className="group-hover:text-primary transition-colors">{project.title}</CardTitle>
+                    <CardTitle className="group-hover:text-primary transition-colors">
+                      {project.title}
+                    </CardTitle>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -732,7 +948,9 @@ export default function ZeeshanPortfolio() {
                       </a>
                     </Button>
                   </div>
-                  <CardDescription className="leading-relaxed mb-4">{project.description}</CardDescription>
+                  <CardDescription className="leading-relaxed mb-4">
+                    {project.description}
+                  </CardDescription>
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
                       <Badge
@@ -763,7 +981,10 @@ export default function ZeeshanPortfolio() {
       </section>
 
       {/* Experience Section */}
-      <section id="experience" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <section
+        id="experience"
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
@@ -790,17 +1011,18 @@ export default function ZeeshanPortfolio() {
                     period: "Apr 2024 – Sep 2025",
                     description:
                       "Owning backend and API development for enterprise SaaS and POS platforms using Laravel and JavaScript.",
-                    skills: ["PHP",
-                        "Laravel",
-                        "CodeIgniter",
-                        "Node.js",
-                        "Livewire",
-                        "AWS",
-                        "Docker",
-                        "Jenkins",
-                        "CI/CD",
-                        "Team Lead"
-                      ],
+                    skills: [
+                      "PHP",
+                      "Laravel",
+                      "CodeIgniter",
+                      "Node.js",
+                      "Livewire",
+                      "AWS",
+                      "Docker",
+                      "Jenkins",
+                      "CI/CD",
+                      "Team Lead",
+                    ],
                   },
                   {
                     title: "Software Engineer (Laravel / JavaScript)",
@@ -808,19 +1030,20 @@ export default function ZeeshanPortfolio() {
                     period: "Apr 2022 – Mar 2024",
                     description:
                       "Built payment, marketplace and health platforms with Laravel APIs, JavaScript frontends and cloud deployments.",
-                    skills: ["PHP",
-                            "Laravel",
-                            "API Development",
-                            "MySQL",
-                            "PostgreSQL",
-                            "JavaScript",
-                            "Docker",
-                            "AWS",
-                            "Shippo",
-                            "Stripe",
-                            "PayPal",
-                            "Form.io",
-                          ],
+                    skills: [
+                      "PHP",
+                      "Laravel",
+                      "API Development",
+                      "MySQL",
+                      "PostgreSQL",
+                      "JavaScript",
+                      "Docker",
+                      "AWS",
+                      "Shippo",
+                      "Stripe",
+                      "PayPal",
+                      "Form.io",
+                    ],
                   },
                   {
                     title: "PHP Developer",
@@ -829,35 +1052,48 @@ export default function ZeeshanPortfolio() {
                     description:
                       "Delivered custom web solutions for international clients using PHP, MySQL and modern front-end tools.",
                     skills: [
-                          "PHP",
-                          "MySQL",
-                          "HTML/CSS",
-                          "Bootstrap",
-                          "jQuery",
-                          "Google Cloud",
-                          "GitHub",
-                          "Stripe",
-                          "ActiveCampaign",
-                          "SendGrid",
-                        ],
+                      "PHP",
+                      "MySQL",
+                      "HTML/CSS",
+                      "Bootstrap",
+                      "jQuery",
+                      "Google Cloud",
+                      "GitHub",
+                      "Stripe",
+                      "ActiveCampaign",
+                      "SendGrid",
+                    ],
                   },
                 ].map((job, index) => (
-                  <div key={index} className="relative pl-8 border-l-2 border-primary/20">
+                  <div
+                    key={index}
+                    className="relative pl-8 border-l-2 border-primary/20"
+                  >
                     <div className="absolute -left-2 top-0 w-4 h-4 bg-primary rounded-full"></div>
                     <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
                       <CardContent className="p-6">
                         <div className="mb-4">
-                          <h4 className="text-lg font-semibold text-foreground">{job.title}</h4>
-                          <p className="text-primary font-medium">{job.company}</p>
+                          <h4 className="text-lg font-semibold text-foreground">
+                            {job.title}
+                          </h4>
+                          <p className="text-primary font-medium">
+                            {job.company}
+                          </p>
                           <p className="text-sm text-muted-foreground flex items-center">
                             <Calendar className="h-4 w-4 mr-1" />
                             {job.period}
                           </p>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed mb-4">{job.description}</p>
+                        <p className="text-muted-foreground leading-relaxed mb-4">
+                          {job.description}
+                        </p>
                         <div className="flex flex-wrap gap-2">
                           {job.skills.map((skill) => (
-                            <Badge key={skill} variant="outline" className="text-xs">
+                            <Badge
+                              key={skill}
+                              variant="outline"
+                              className="text-xs"
+                            >
                               {skill}
                             </Badge>
                           ))}
@@ -884,25 +1120,42 @@ export default function ZeeshanPortfolio() {
                     period: "2016 - 2020",
                     description:
                       "Foundation in computer science fundamentals, algorithms, and data structures. Active member of the Computer Science Society.",
-                    achievements: ["Algorithms", "Data Structures", "CS Society"],
+                    achievements: [
+                      "Algorithms",
+                      "Data Structures",
+                      "CS Society",
+                    ],
                   },
                 ].map((education, index) => (
-                  <div key={index} className="relative pl-8 border-l-2 border-secondary/20">
+                  <div
+                    key={index}
+                    className="relative pl-8 border-l-2 border-secondary/20"
+                  >
                     <div className="absolute -left-2 top-0 w-4 h-4 bg-secondary rounded-full"></div>
                     <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
                       <CardContent className="p-6">
                         <div className="mb-4">
-                          <h4 className="text-lg font-semibold text-foreground">{education.degree}</h4>
-                          <p className="text-secondary font-medium">{education.school}</p>
+                          <h4 className="text-lg font-semibold text-foreground">
+                            {education.degree}
+                          </h4>
+                          <p className="text-secondary font-medium">
+                            {education.school}
+                          </p>
                           <p className="text-sm text-muted-foreground flex items-center">
                             <Calendar className="h-4 w-4 mr-1" />
                             {education.period}
                           </p>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed mb-4">{education.description}</p>
+                        <p className="text-muted-foreground leading-relaxed mb-4">
+                          {education.description}
+                        </p>
                         <div className="flex flex-wrap gap-2">
                           {education.achievements.map((achievement) => (
-                            <Badge key={achievement} variant="outline" className="text-xs">
+                            <Badge
+                              key={achievement}
+                              variant="outline"
+                              className="text-xs"
+                            >
                               {achievement}
                             </Badge>
                           ))}
@@ -917,7 +1170,10 @@ export default function ZeeshanPortfolio() {
         </div>
       </section>
 
-      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50">
+      <section
+        id="testimonials"
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
@@ -973,7 +1229,9 @@ export default function ZeeshanPortfolio() {
                       className="w-12 h-12 rounded-full mr-4"
                     />
                     <div>
-                      <h4 className="font-semibold text-slate-800">{testimonial.name}</h4>
+                      <h4 className="font-semibold text-slate-800">
+                        {testimonial.name}
+                      </h4>
                       <p className="text-sm text-slate-600">
                         {testimonial.role} at {testimonial.company}
                       </p>
@@ -981,10 +1239,15 @@ export default function ZeeshanPortfolio() {
                   </div>
                   <div className="flex mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                      <Star
+                        key={i}
+                        className="h-4 w-4 text-yellow-400 fill-current"
+                      />
                     ))}
                   </div>
-                  <p className="text-slate-600 leading-relaxed italic">"{testimonial.testimonial}"</p>
+                  <p className="text-slate-600 leading-relaxed italic">
+                    "{testimonial.testimonial}"
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -998,33 +1261,51 @@ export default function ZeeshanPortfolio() {
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
               Get In{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Touch</span>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Touch
+              </span>
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              Ready to start your next project? Let's discuss how I can help bring your ideas to life.
+              Ready to start your next project? Let's discuss how I can help
+              bring your ideas to life.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-16">
             <div>
-              <h3 className="text-2xl font-bold mb-6 text-slate-800">Let's work together</h3>
+              <h3 className="text-2xl font-bold mb-6 text-slate-800">
+                Let's work together
+              </h3>
               <p className="text-slate-600 mb-8 leading-relaxed text-lg">
-                I'm a dedicated software engineer specializing in backend and full-stack development. Whether you need to build
-                enterprise-grade solutions, modernize legacy applications, or integrate complex systems, I’d love to collaborate and help bring your vision to life.
+                I'm a dedicated software engineer specializing in backend and
+                full-stack development. Whether you need to build
+                enterprise-grade solutions, modernize legacy applications, or
+                integrate complex systems, I’d love to collaborate and help
+                bring your vision to life.
               </p>
 
               <div className="space-y-6 mb-8">
                 {[
-                  { icon: Mail, label: "Email", value: "zeeshan.haider.engineer@gmail.com" },
+                  {
+                    icon: Mail,
+                    label: "Email",
+                    value: "zeeshan.haider.engineer@gmail.com",
+                  },
                   { icon: Phone, label: "Phone", value: "+971 58 989 0134" },
-                  { icon: MapPin, label: "Location", value: "26 A street 34 villa Abu Hail Diera, Dubai" },
+                  {
+                    icon: MapPin,
+                    label: "Location",
+                    value: "26 A street 34 villa Abu Hail Diera, Dubai",
+                  },
                 ].map((contact, index) => (
                   <div key={index} className="flex items-center group">
                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
                       <contact.icon className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-slate-800">{contact.label}</p>
+                      <p className="font-medium text-slate-800">
+                        {contact.label}
+                      </p>
                       <p className="text-slate-600">{contact.value}</p>
                     </div>
                   </div>
@@ -1040,7 +1321,11 @@ export default function ZeeshanPortfolio() {
                     className="hover:bg-blue-600 hover:text-white hover:scale-110 transition-all duration-300 border-blue-200 bg-transparent"
                     asChild
                   >
-                    <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
+                    <a
+                      href="https://github.com/iamzeeshanhaider"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Github className="h-4 w-4" />
                     </a>
                   </Button>
@@ -1050,11 +1335,14 @@ export default function ZeeshanPortfolio() {
                     className="hover:bg-blue-600 hover:text-white hover:scale-110 transition-all duration-300 border-blue-200 bg-transparent"
                     asChild
                   >
-                    <a href="https://www.linkedin.com/in/zeeshan-haider73/" target="_blank" rel="noopener noreferrer">
+                    <a
+                      href="https://www.linkedin.com/in/zeeshan-haider73/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Linkedin className="h-4 w-4" />
                     </a>
                   </Button>
-
                 </div>
               </div>
             </div>
@@ -1064,23 +1352,56 @@ export default function ZeeshanPortfolio() {
                 <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="firstName" className="block text-sm font-medium text-slate-800 mb-2">
+                      <label
+                        htmlFor="firstName"
+                        className="block text-sm font-medium text-slate-800 mb-2"
+                      >
                         First Name
                       </label>
-                      <Input id="firstName" placeholder="John" value={form.firstName} onChange={handleChange} className={`bg-white/50 border-slate-200 ${errors.firstName ? 'border-red-500' : ''}`} />
-                      {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+                      <Input
+                        id="firstName"
+                        placeholder="John"
+                        value={form.firstName}
+                        onChange={handleChange}
+                        className={`bg-white/50 border-slate-200 ${
+                          errors.firstName ? "border-red-500" : ""
+                        }`}
+                      />
+                      {errors.firstName && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.firstName}
+                        </p>
+                      )}
                     </div>
                     <div>
-                      <label htmlFor="lastName" className="block text-sm font-medium text-slate-800 mb-2">
+                      <label
+                        htmlFor="lastName"
+                        className="block text-sm font-medium text-slate-800 mb-2"
+                      >
                         Last Name
                       </label>
-                      <Input id="lastName" placeholder="Doe" value={form.lastName} onChange={handleChange} className={`bg-white/50 border-slate-200 ${errors.lastName ? 'border-red-500' : ''}`} />
-                      {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+                      <Input
+                        id="lastName"
+                        placeholder="Doe"
+                        value={form.lastName}
+                        onChange={handleChange}
+                        className={`bg-white/50 border-slate-200 ${
+                          errors.lastName ? "border-red-500" : ""
+                        }`}
+                      />
+                      {errors.lastName && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.lastName}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-slate-800 mb-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-slate-800 mb-2"
+                    >
                       Email
                     </label>
                     <Input
@@ -1089,21 +1410,45 @@ export default function ZeeshanPortfolio() {
                       placeholder="john@example.com"
                       value={form.email}
                       onChange={handleChange}
-                      className={`bg-white/50 border-slate-200 ${errors.email ? 'border-red-500' : ''}`}
+                      className={`bg-white/50 border-slate-200 ${
+                        errors.email ? "border-red-500" : ""
+                      }`}
                     />
-                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-slate-800 mb-2">
+                    <label
+                      htmlFor="subject"
+                      className="block text-sm font-medium text-slate-800 mb-2"
+                    >
                       Subject
                     </label>
-                    <Input id="subject" placeholder="Project Discussion" value={form.subject} onChange={handleChange} className={`bg-white/50 border-slate-200 ${errors.subject ? 'border-red-500' : ''}`} />
-                    {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject}</p>}
+                    <Input
+                      id="subject"
+                      placeholder="Project Discussion"
+                      value={form.subject}
+                      onChange={handleChange}
+                      className={`bg-white/50 border-slate-200 ${
+                        errors.subject ? "border-red-500" : ""
+                      }`}
+                    />
+                    {errors.subject && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.subject}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-slate-800 mb-2">
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-slate-800 mb-2"
+                    >
                       Message
                     </label>
                     <Textarea
@@ -1111,9 +1456,15 @@ export default function ZeeshanPortfolio() {
                       placeholder="Tell me about your project..."
                       value={form.message}
                       onChange={handleChange}
-                      className={`min-h-[120px] bg-white/50 border-slate-200 ${errors.message ? 'border-red-500' : ''}`}
+                      className={`min-h-[120px] bg-white/50 border-slate-200 ${
+                        errors.message ? "border-red-500" : ""
+                      }`}
                     />
-                    {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+                    {errors.message && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.message}
+                      </p>
+                    )}
                   </div>
 
                   <Button
@@ -1148,7 +1499,8 @@ export default function ZeeshanPortfolio() {
                 </h3>
               </div>
               <p className="text-slate-300 mb-6 leading-relaxed">
-               Passionate Senior Software Engineer crafting scalable web applications and meaningful digital experiences.
+                Passionate Senior Software Engineer crafting scalable web
+                applications and meaningful digital experiences.
               </p>
               <div className="flex space-x-4">
                 <Button
@@ -1157,7 +1509,11 @@ export default function ZeeshanPortfolio() {
                   className="text-slate-300 hover:text-white hover:bg-slate-800"
                   asChild
                 >
-                  <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://github.com/iamzeeshanhaider"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Github className="h-4 w-4" />
                   </a>
                 </Button>
@@ -1167,24 +1523,32 @@ export default function ZeeshanPortfolio() {
                   className="text-slate-300 hover:text-white hover:bg-slate-800"
                   asChild
                 >
-                  <a href="https://www.linkedin.com/in/zeeshan-haider73/" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://www.linkedin.com/in/zeeshan-haider73/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Linkedin className="h-4 w-4" />
                   </a>
                 </Button>
-
               </div>
             </div>
 
             <div>
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-slate-300">
-                {["About", "Services", "Skills", "Projects", "Contact"].map((link) => (
-                  <li key={link}>
-                    <a href={`#${link.toLowerCase()}`} className="hover:text-white transition-colors">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {["About", "Services", "Skills", "Projects", "Contact"].map(
+                  (link) => (
+                    <li key={link}>
+                      <a
+                        href={`#${link.toLowerCase()}`}
+                        className="hover:text-white transition-colors"
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  )
+                )}
               </ul>
             </div>
 
@@ -1201,10 +1565,13 @@ export default function ZeeshanPortfolio() {
           </div>
 
           <div className="border-t border-slate-800 pt-8 text-center text-slate-400">
-            <p>&copy; 2025 Zeeshan Haider. All rights reserved. Built with passion and expertise.</p>
+            <p>
+              &copy; 2025 Zeeshan Haider. All rights reserved. Built with
+              passion and expertise.
+            </p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
