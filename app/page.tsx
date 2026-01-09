@@ -44,8 +44,124 @@ import {
   Cpu,
   Monitor,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useCountUp } from "@/hooks/use-count-up";
+import { LucideIcon } from "lucide-react";
+
+// StatCard Component with animations
+function StatCard({
+  icon: Icon,
+  number,
+  suffix,
+  label,
+  color,
+  delay,
+}: {
+  icon: LucideIcon;
+  number: number;
+  suffix: string;
+  label: string;
+  color: string;
+  delay: number;
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [shouldCount, setShouldCount] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const hasTriggeredRef = useRef(false);
+
+  useEffect(() => {
+    let observer: IntersectionObserver | null = null;
+    let scrollHandler: (() => void) | null = null;
+
+    // Small delay to check initial position after render
+    const initTimeout = setTimeout(() => {
+      if (!cardRef.current) return;
+
+      // Check if element is already visible on initial load (no scroll)
+      const rect = cardRef.current.getBoundingClientRect();
+      const isInViewportOnLoad = rect.top >= 0 && rect.top < window.innerHeight && window.scrollY === 0;
+      
+      // Create observer
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && !hasTriggeredRef.current) {
+              hasTriggeredRef.current = true;
+              setIsVisible(true);
+              setTimeout(() => {
+                setShouldAnimate(true);
+              }, 50);
+              setTimeout(() => {
+                setShouldCount(true);
+              }, delay * 1000 + 500);
+            }
+          });
+        },
+        { 
+          threshold: 0.1,
+          rootMargin: '0px 0px -10% 0px'
+        }
+      );
+      
+      // If element is visible on load without scrolling, wait for scroll
+      if (isInViewportOnLoad) {
+        scrollHandler = () => {
+          if (window.scrollY > 50 && !hasTriggeredRef.current && cardRef.current && observer) {
+            observer.observe(cardRef.current);
+            window.removeEventListener('scroll', scrollHandler!);
+            scrollHandler = null;
+          }
+        };
+        window.addEventListener('scroll', scrollHandler, { passive: true });
+      } else {
+        // Element is not visible on load, observe immediately
+        if (cardRef.current) {
+          observer.observe(cardRef.current);
+        }
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(initTimeout);
+      if (scrollHandler) {
+        window.removeEventListener('scroll', scrollHandler);
+      }
+      if (observer && cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, [delay]);
+
+  const { displayValue } = useCountUp({
+    end: number,
+    duration: 3500,
+    start: 0,
+    suffix: suffix,
+    shouldStart: shouldCount,
+  });
+
+  const staggerClass = `stat-card-stagger-${Math.min(Math.floor(delay * 10) + 1, 4)}`;
+
+  return (
+    <div ref={cardRef} className="w-full">
+      <Card
+        className={`text-center stat-card-hover bg-white/70 backdrop-blur-sm border-white/20 ${
+          shouldAnimate ? `stat-card-enter ${staggerClass}` : "opacity-0 translate-y-[60px] scale-90 pointer-events-none"
+        }`}
+      >
+        <CardContent className="p-6">
+          <Icon className={`h-8 w-8 mx-auto mb-4 ${color}`} />
+          <div className={`text-3xl font-bold mb-2 ${color}`}>
+            {shouldCount ? displayValue : "0" + suffix}
+          </div>
+          <div className="text-sm text-slate-600">{label}</div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function ZeeshanPortfolio() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -427,20 +543,24 @@ export default function ZeeshanPortfolio() {
                 label: "Client Satisfaction",
                 color: "text-purple-600",
               },
-            ].map((stat, index) => (
-              <Card
-                key={index}
-                className="text-center hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white/70 backdrop-blur-sm border-white/20"
-              >
-                <CardContent className="p-6">
-                  <stat.icon className={`h-8 w-8 mx-auto mb-4 ${stat.color}`} />
-                  <div className={`text-3xl font-bold mb-2 ${stat.color}`}>
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-slate-600">{stat.label}</div>
-                </CardContent>
-              </Card>
-            ))}
+            ].map((stat, index) => {
+              // Parse value to extract number and suffix
+              const match = stat.value.match(/(\d+)(.*)/);
+              const number = match ? parseInt(match[1], 10) : 0;
+              const suffix = match ? match[2] : "";
+              
+              return (
+                <StatCard
+                  key={index}
+                  icon={stat.icon}
+                  number={number}
+                  suffix={suffix}
+                  label={stat.label}
+                  color={stat.color}
+                  delay={index * 0.15}
+                />
+              );
+            })}
           </div>
         </div>
       </section>
