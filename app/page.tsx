@@ -307,10 +307,7 @@ export default function ZeeshanPortfolio() {
               </p>
 
               <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-xl">
-                {/* 5+ years of experience building scalable web applications and enterprise solutions across healthcare,
-                e-commerce, and SaaS industries. Specialized in PHP, Laravel, Next.js, and modern full-stack
-                development. */}
-                {/* With over 5 years of experience in building scalable and high-performing web applications, I specialize in developing enterprise solutions across industries such as healthcare, e-commerce, and SaaS. My expertise lies in PHP, Laravel, Node.js, Nest.js and modern full-stack development, focusing on creating robust backends, intuitive frontends, and seamless user experiences. */}
+               
                 I build scalable web applications, APIs, and platforms using
                 Laravel, Node.js, React.js, and PostgreSQL. Experience across
                 POS, marketplaces, logistics, and SaaS products.
@@ -381,17 +378,17 @@ export default function ZeeshanPortfolio() {
                 </div>
 
                 {/* Floating Stats Cards */}
-                <div className="absolute -top-6 -right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20">
+                <div className="absolute -top-6 -right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20 float-1">
                   <div className="text-2xl font-bold text-blue-600">5+</div>
                   <div className="text-xs text-slate-600">Years Exp</div>
                 </div>
 
-                <div className="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20">
+                <div className="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20 float-2">
                   <div className="text-2xl font-bold text-indigo-600">30+</div>
                   <div className="text-xs text-slate-600">Projects</div>
                 </div>
 
-                <div className="absolute top-1/2 -left-8 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20">
+                <div className="absolute top-1/2 -left-8 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20 float-3">
                   <div className="text-2xl font-bold text-green-600">40%</div>
                   <div className="text-xs text-slate-600">Efficiency</div>
                 </div>

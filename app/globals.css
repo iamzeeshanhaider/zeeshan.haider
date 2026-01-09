@@ -154,6 +154,63 @@
     }
   }
 
+  .float-1 {
+    animation: floatAround1 8s ease-in-out infinite;
+  }
+
+  .float-2 {
+    animation: floatAround2 10s ease-in-out infinite;
+  }
+
+  .float-3 {
+    animation: floatAround3 9s ease-in-out infinite;
+  }
+
+  @keyframes floatAround1 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(10px, -15px) rotate(2deg);
+    }
+    50% {
+      transform: translate(-5px, -25px) rotate(-1deg);
+    }
+    75% {
+      transform: translate(-10px, -10px) rotate(1deg);
+    }
+  }
+
+  @keyframes floatAround2 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(-12px, 15px) rotate(-2deg);
+    }
+    50% {
+      transform: translate(8px, 25px) rotate(1deg);
+    }
+    75% {
+      transform: translate(12px, 10px) rotate(-1deg);
+    }
+  }
+
+  @keyframes floatAround3 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(15px, -8px) rotate(1deg);
+    }
+    50% {
+      transform: translate(-8px, -18px) rotate(-2deg);
+    }
+    75% {
+      transform: translate(-15px, -5px) rotate(1deg);
+    }
+  }
+
   .fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
     opacity: 0;
