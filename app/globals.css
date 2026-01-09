@@ -288,6 +288,383 @@
     border-color: rgba(59, 130, 246, 0.3) !important;
   }
 
+  /* About Me Section Animations */
+  .about-fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .about-fade-in-left {
+    animation: fadeInLeft 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  .about-fade-in-right {
+    animation: fadeInRight 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  .about-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  @keyframes fadeInLeft {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeInRight {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .about-stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .about-stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .about-stagger-3 {
+    animation-delay: 0.3s;
+  }
+
+  .about-stagger-4 {
+    animation-delay: 0.4s;
+  }
+
+  .about-stagger-5 {
+    animation-delay: 0.5s;
+  }
+
+  .about-stagger-6 {
+    animation-delay: 0.6s;
+  }
+
+  /* Skills Section Animations */
+  .skills-fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .skills-card-enter {
+    animation: skillsCardSlideIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+
+  .skills-badge-enter {
+    animation: skillsBadgeFadeIn 0.4s ease-out forwards;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  @keyframes skillsCardSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes skillsBadgeFadeIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .skills-stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .skills-stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .skills-stagger-3 {
+    animation-delay: 0.3s;
+  }
+
+  .skills-stagger-4 {
+    animation-delay: 0.4s;
+  }
+
+  .skills-stagger-5 {
+    animation-delay: 0.5s;
+  }
+
+  .skills-stagger-6 {
+    animation-delay: 0.6s;
+  }
+
+  /* Services Section Animations */
+  .services-fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .services-card-enter {
+    animation: servicesCardSlideIn 0.7s ease-out forwards;
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+
+  @keyframes servicesCardSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(50px) scale(0.9);
+    }
+    60% {
+      transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .services-stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .services-stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .services-stagger-3 {
+    animation-delay: 0.3s;
+  }
+
+  /* Projects Section Animations */
+  .projects-fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .projects-card-enter {
+    animation: projectsCardSlideIn 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(60px) scale(0.9) rotateX(10deg);
+  }
+
+  .projects-tag-enter {
+    animation: projectsTagFadeIn 0.4s ease-out forwards;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  @keyframes projectsCardSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(60px) scale(0.9) rotateX(10deg);
+    }
+    50% {
+      transform: translateY(-8px) scale(1.02) rotateX(-2deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotateX(0deg);
+    }
+  }
+
+  @keyframes projectsTagFadeIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .projects-stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .projects-stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  /* Experience Section Animations */
+  .experience-fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .experience-timeline-enter {
+    animation: experienceTimelineSlideIn 0.7s ease-out forwards;
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  .experience-skill-enter {
+    animation: experienceSkillFadeIn 0.4s ease-out forwards;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  @keyframes experienceTimelineSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes experienceSkillFadeIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .experience-stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  /* Testimonials Section Animations */
+  .testimonials-fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .testimonials-card-enter {
+    animation: testimonialsCardSlideIn 0.7s ease-out forwards;
+    opacity: 0;
+    transform: translateY(50px) scale(0.95);
+  }
+
+  @keyframes testimonialsCardSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(50px) scale(0.95);
+    }
+    60% {
+      transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .testimonials-stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  /* Contact Section Animations */
+  .contact-fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .contact-fade-in-left {
+    animation: fadeInLeft 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  .contact-fade-in-right {
+    animation: fadeInRight 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  .contact-item-enter {
+    animation: contactItemSlideIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  .contact-form-enter {
+    animation: contactFormSlideIn 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+
+  @keyframes contactItemSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes contactFormSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    60% {
+      transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .contact-stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .contact-stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .contact-stagger-3 {
+    animation-delay: 0.3s;
+  }
+
   /* Added smooth scrolling and enhanced hover effects */
   html {
     scroll-behavior: smooth;
