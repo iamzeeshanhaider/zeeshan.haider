@@ -11,9 +11,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Code2,
-  Palette,
   Smartphone,
   Globe,
   Database,
@@ -43,6 +44,12 @@ import {
   Settings,
   Cpu,
   Monitor,
+  Sparkles,
+  HeartPulse,
+  Brain,
+  Layout,
+  Bell,
+  BarChart3,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -50,7 +57,7 @@ import { useCountUp } from "@/hooks/use-count-up";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { LucideIcon } from "lucide-react";
 
-// StatCard Component with animations
+/* ---------- Stat Card ---------- */
 function StatCard({
   icon: Icon,
   number,
@@ -76,95 +83,90 @@ function StatCard({
     let observer: IntersectionObserver | null = null;
     let scrollHandler: (() => void) | null = null;
 
-    // Small delay to check initial position after render
     const initTimeout = setTimeout(() => {
       if (!cardRef.current) return;
 
-      // Check if element is already visible on initial load (no scroll)
       const rect = cardRef.current.getBoundingClientRect();
-      const isInViewportOnLoad = rect.top >= 0 && rect.top < window.innerHeight && window.scrollY === 0;
-      
-      // Create observer
+      const isInViewportOnLoad =
+        rect.top >= 0 && rect.top < window.innerHeight && window.scrollY === 0;
+
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting && !hasTriggeredRef.current) {
               hasTriggeredRef.current = true;
               setIsVisible(true);
-              setTimeout(() => {
-                setShouldAnimate(true);
-              }, 50);
-              setTimeout(() => {
-                setShouldCount(true);
-              }, delay * 1000 + 500);
+              setTimeout(() => setShouldAnimate(true), 50);
+              setTimeout(() => setShouldCount(true), delay * 1000 + 500);
             }
           });
         },
-        { 
-          threshold: 0.1,
-          rootMargin: '0px 0px -10% 0px'
-        }
+        { threshold: 0.1, rootMargin: "0px 0px -10% 0px" }
       );
-      
-      // If element is visible on load without scrolling, wait for scroll
+
       if (isInViewportOnLoad) {
         scrollHandler = () => {
-          if (window.scrollY > 50 && !hasTriggeredRef.current && cardRef.current && observer) {
+          if (
+            window.scrollY > 50 &&
+            !hasTriggeredRef.current &&
+            cardRef.current &&
+            observer
+          ) {
             observer.observe(cardRef.current);
-            window.removeEventListener('scroll', scrollHandler!);
+            window.removeEventListener("scroll", scrollHandler!);
             scrollHandler = null;
           }
         };
-        window.addEventListener('scroll', scrollHandler, { passive: true });
-      } else {
-        // Element is not visible on load, observe immediately
-        if (cardRef.current) {
-          observer.observe(cardRef.current);
-        }
+        window.addEventListener("scroll", scrollHandler, { passive: true });
+      } else if (cardRef.current) {
+        observer.observe(cardRef.current);
       }
     }, 100);
 
     return () => {
       clearTimeout(initTimeout);
-      if (scrollHandler) {
-        window.removeEventListener('scroll', scrollHandler);
-      }
-      if (observer && cardRef.current) {
-        observer.unobserve(cardRef.current);
-      }
+      if (scrollHandler) window.removeEventListener("scroll", scrollHandler);
+      if (observer && cardRef.current) observer.unobserve(cardRef.current);
     };
   }, [delay]);
 
   const { displayValue } = useCountUp({
     end: number,
-    duration: 3500,
+    duration: 3200,
     start: 0,
-    suffix: suffix,
+    suffix,
     shouldStart: shouldCount,
   });
 
-  const staggerClass = `stat-card-stagger-${Math.min(Math.floor(delay * 10) + 1, 4)}`;
+  const staggerClass = `stat-card-stagger-${Math.min(
+    Math.floor(delay * 10) + 1,
+    4
+  )}`;
 
   return (
     <div ref={cardRef} className="w-full">
       <Card
-        className={`text-center stat-card-hover bg-white/70 backdrop-blur-sm border-white/20 ${
-          shouldAnimate ? `stat-card-enter ${staggerClass}` : "opacity-0 translate-y-[60px] scale-90 pointer-events-none"
+        className={`text-center stat-card-hover glass-card ${
+          shouldAnimate
+            ? `stat-card-enter ${staggerClass}`
+            : "opacity-0 translate-y-[48px] scale-90 pointer-events-none"
         }`}
       >
         <CardContent className="p-6">
-          <Icon className={`h-8 w-8 mx-auto mb-4 ${color}`} />
-          <div className={`text-3xl font-bold mb-2 ${color}`}>
+          <div className={`h-12 w-12 mx-auto mb-4 rounded-xl flex items-center justify-center bg-gradient-to-br ${color}`}>
+            <Icon className="h-6 w-6 text-white" />
+          </div>
+          <div className="text-3xl font-bold mb-2 gradient-text">
             {shouldCount ? displayValue : "0" + suffix}
           </div>
-          <div className="text-sm text-slate-600">{label}</div>
+          <div className="text-sm text-muted-foreground">{label}</div>
         </CardContent>
       </Card>
     </div>
   );
 }
 
-// About Metric Card Component with count-up animation
+/* ---------- About Metric Card ---------- */
 function AboutMetricCard({
   icon: Icon,
   label,
@@ -179,51 +181,44 @@ function AboutMetricCard({
   isVisible: boolean;
 }) {
   const [shouldCount, setShouldCount] = useState(false);
-
-  // Parse value to extract number and suffix/prefix
   const match = value.match(/(\d+)(.*)/);
   const number = match ? parseInt(match[1], 10) : 0;
-  const suffix = match ? match[2] : value; // If no number, use original value (for "5★")
+  const suffix = match ? match[2] : value;
 
   useEffect(() => {
     if (isVisible) {
-      // Start count-up after card animation (delay based on index)
-      const timer = setTimeout(() => {
-        setShouldCount(true);
-      }, 200 + index * 150 + 300); // Wait for card animation + extra delay
+      const timer = setTimeout(() => setShouldCount(true), 200 + index * 150 + 300);
       return () => clearTimeout(timer);
     }
   }, [isVisible, index]);
 
   const { displayValue } = useCountUp({
     end: number,
-    duration: 2500,
+    duration: 2400,
     start: 0,
-    suffix: suffix,
+    suffix,
     shouldStart: shouldCount && number > 0,
   });
 
   return (
     <Card
-      className={`bg-white/70 backdrop-blur-sm border-white/20 hover:shadow-xl transition-all duration-300 hover:scale-105 ${
-        isVisible ? "about-fade-in-right" : "opacity-0 translate-x-[30px]"
+      className={`glass-card glow-on-hover ${
+        isVisible ? "about-fade-in-right" : "opacity-0 translate-x-[28px]"
       }`}
-      style={{
-        animationDelay: isVisible ? `${0.2 + index * 0.15}s` : undefined,
-      }}
+      style={{ animationDelay: isVisible ? `${0.2 + index * 0.15}s` : undefined }}
     >
       <CardContent className="p-6 text-center">
-        <Icon className="h-8 w-8 mx-auto mb-4 text-blue-600" />
-        <div className="text-2xl font-bold text-blue-600 mb-2">
+        <Icon className="h-8 w-8 mx-auto mb-4 text-primary" />
+        <div className="text-2xl font-bold text-primary mb-2">
           {number > 0 ? (shouldCount ? displayValue : `0${suffix}`) : value}
         </div>
-        <div className="text-sm text-slate-600">{label}</div>
+        <div className="text-sm text-muted-foreground">{label}</div>
       </CardContent>
     </Card>
   );
 }
 
-// Experience Section Component with animations
+/* ---------- Experience Section ---------- */
 function ExperienceSection() {
   const { isVisible: isHeadingVisible, elementRef: headingRef } = useScrollAnimation();
   const { isVisible: isExperienceVisible, elementRef: experienceRef } = useScrollAnimation();
@@ -236,18 +231,7 @@ function ExperienceSection() {
       period: "Apr 2024 – Sep 2025",
       description:
         "Owning backend and API development for enterprise SaaS and POS platforms using Laravel and JavaScript.",
-      skills: [
-        "PHP",
-        "Laravel",
-        "CodeIgniter",
-        "Node.js",
-        "Livewire",
-        "AWS",
-        "Docker",
-        "Jenkins",
-        "CI/CD",
-        "Team Lead",
-      ],
+      skills: ["PHP", "Laravel", "CodeIgniter", "Node.js", "Livewire", "AWS", "Docker", "Jenkins", "CI/CD", "Team Lead"],
     },
     {
       title: "Software Engineer (Laravel / JavaScript)",
@@ -255,20 +239,7 @@ function ExperienceSection() {
       period: "Apr 2022 – Mar 2024",
       description:
         "Built payment, marketplace and health platforms with Laravel APIs, JavaScript frontends and cloud deployments.",
-      skills: [
-        "PHP",
-        "Laravel",
-        "API Development",
-        "MySQL",
-        "PostgreSQL",
-        "JavaScript",
-        "Docker",
-        "AWS",
-        "Shippo",
-        "Stripe",
-        "PayPal",
-        "Form.io",
-      ],
+      skills: ["PHP", "Laravel", "API Development", "MySQL", "PostgreSQL", "JavaScript", "Docker", "AWS", "Shippo", "Stripe", "PayPal", "Form.io"],
     },
     {
       title: "PHP Developer",
@@ -276,18 +247,7 @@ function ExperienceSection() {
       period: "Mar 2020 – Mar 2022",
       description:
         "Delivered custom web solutions for international clients using PHP, MySQL and modern front-end tools.",
-      skills: [
-        "PHP",
-        "MySQL",
-        "HTML/CSS",
-        "Bootstrap",
-        "jQuery",
-        "Google Cloud",
-        "GitHub",
-        "Stripe",
-        "ActiveCampaign",
-        "SendGrid",
-      ],
+      skills: ["PHP", "MySQL", "HTML/CSS", "Bootstrap", "jQuery", "Google Cloud", "GitHub", "Stripe", "ActiveCampaign", "SendGrid"],
     },
   ];
 
@@ -298,31 +258,25 @@ function ExperienceSection() {
       period: "2016 - 2020",
       description:
         "Foundation in computer science fundamentals, algorithms, and data structures. Active member of the Computer Science Society.",
-      achievements: [
-        "Algorithms",
-        "Data Structures",
-        "CS Society",
-      ],
+      achievements: ["Algorithms", "Data Structures", "CS Society"],
     },
   ];
 
   return (
-    <section
-      id="experience"
-      className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30"
-    >
+    <section id="experience" className="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute inset-0 -z-10 dot-bg opacity-50" />
       <div className="max-w-7xl mx-auto">
         <div ref={headingRef} className="text-center mb-16">
           <h2
             className={`text-4xl lg:text-5xl font-bold mb-6 ${
-              isHeadingVisible ? "experience-fade-in" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "experience-fade-in" : "opacity-0 translate-y-[28px]"
             }`}
           >
             Experience & <span className="gradient-text">Education</span>
           </h2>
           <p
             className={`text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed ${
-              isHeadingVisible ? "experience-fade-in experience-stagger-1" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "experience-fade-in experience-stagger-1" : "opacity-0 translate-y-[28px]"
             }`}
           >
             My professional journey and educational background
@@ -330,48 +284,34 @@ function ExperienceSection() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-16">
-          {/* Experience Timeline */}
           <div ref={experienceRef}>
             <h3
               className={`text-2xl font-bold mb-8 flex items-center ${
-                isExperienceVisible ? "experience-fade-in" : "opacity-0 translate-y-[30px]"
+                isExperienceVisible ? "experience-fade-in" : "opacity-0 translate-y-[28px]"
               }`}
             >
               <Award className="h-6 w-6 mr-3 text-primary" />
               Experience
             </h3>
-
             <div className="space-y-8">
               {jobs.map((job, index) => (
-                <ExperienceTimelineItem
-                  key={index}
-                  job={job}
-                  index={index}
-                  isVisible={isExperienceVisible}
-                />
+                <ExperienceTimelineItem key={index} job={job} index={index} isVisible={isExperienceVisible} />
               ))}
             </div>
           </div>
 
-          {/* Education */}
           <div ref={educationRef}>
             <h3
               className={`text-2xl font-bold mb-8 flex items-center ${
-                isEducationVisible ? "experience-fade-in" : "opacity-0 translate-y-[30px]"
+                isEducationVisible ? "experience-fade-in" : "opacity-0 translate-y-[28px]"
               }`}
             >
               <BookOpen className="h-6 w-6 mr-3 text-secondary" />
               Education
             </h3>
-
             <div className="space-y-8">
               {education.map((edu, index) => (
-                <EducationTimelineItem
-                  key={index}
-                  education={edu}
-                  index={index}
-                  isVisible={isEducationVisible}
-                />
+                <EducationTimelineItem key={index} education={edu} index={index} isVisible={isEducationVisible} />
               ))}
             </div>
           </div>
@@ -381,19 +321,12 @@ function ExperienceSection() {
   );
 }
 
-// Experience Timeline Item Component
 function ExperienceTimelineItem({
   job,
   index,
   isVisible,
 }: {
-  job: {
-    title: string;
-    company: string;
-    period: string;
-    description: string;
-    skills: string[];
-  };
+  job: { title: string; company: string; period: string; description: string; skills: string[] };
   index: number;
   isVisible: boolean;
 }) {
@@ -401,45 +334,37 @@ function ExperienceTimelineItem({
 
   useEffect(() => {
     if (isVisible) {
-      const timer = setTimeout(() => {
-        setShouldAnimateSkills(true);
-      }, 300 + index * 200);
+      const timer = setTimeout(() => setShouldAnimateSkills(true), 300 + index * 200);
       return () => clearTimeout(timer);
     }
   }, [isVisible, index]);
 
   return (
     <div
-      className={`relative pl-8 border-l-2 border-primary/20 ${
-        isVisible ? "experience-timeline-enter" : "opacity-0 translate-x-[-40px]"
+      className={`relative pl-8 border-l-2 border-primary/25 ${
+        isVisible ? "experience-timeline-enter" : "opacity-0 translate-x-[-36px]"
       }`}
-      style={{
-        animationDelay: isVisible ? `${0.3 + index * 0.25}s` : undefined,
-      }}
+      style={{ animationDelay: isVisible ? `${0.3 + index * 0.25}s` : undefined }}
     >
-      <div className="absolute -left-2 top-0 w-4 h-4 bg-primary rounded-full"></div>
-      <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
+      <div className="absolute -left-[9px] top-0 w-4 h-4 bg-primary rounded-full ring-4 ring-primary/20" />
+      <Card className="glass-card glow-on-hover border-0">
         <CardContent className="p-6">
           <div className="mb-4">
-            <h4 className="text-lg font-semibold text-foreground">
-              {job.title}
-            </h4>
+            <h4 className="text-lg font-semibold text-foreground">{job.title}</h4>
             <p className="text-primary font-medium">{job.company}</p>
             <p className="text-sm text-muted-foreground flex items-center">
               <Calendar className="h-4 w-4 mr-1" />
               {job.period}
             </p>
           </div>
-          <p className="text-muted-foreground leading-relaxed mb-4">
-            {job.description}
-          </p>
+          <p className="text-muted-foreground leading-relaxed mb-4">{job.description}</p>
           <div className="flex flex-wrap gap-2">
             {job.skills.map((skill, skillIndex) => (
               <Badge
                 key={skill}
                 variant="outline"
-                className={`text-xs ${
-                  shouldAnimateSkills ? "experience-skill-enter" : "opacity-0 scale-80"
+                className={`text-xs border-primary/20 text-foreground/80 hover:bg-primary/10 hover:border-primary/40 transition-colors ${
+                  shouldAnimateSkills ? "experience-skill-enter" : "opacity-0 scale-[0.8]"
                 }`}
                 style={{
                   animationDelay: shouldAnimateSkills
@@ -457,19 +382,12 @@ function ExperienceTimelineItem({
   );
 }
 
-// Education Timeline Item Component
 function EducationTimelineItem({
   education,
   index,
   isVisible,
 }: {
-  education: {
-    degree: string;
-    school: string;
-    period: string;
-    description: string;
-    achievements: string[];
-  };
+  education: { degree: string; school: string; period: string; description: string; achievements: string[] };
   index: number;
   isVisible: boolean;
 }) {
@@ -477,45 +395,37 @@ function EducationTimelineItem({
 
   useEffect(() => {
     if (isVisible) {
-      const timer = setTimeout(() => {
-        setShouldAnimateAchievements(true);
-      }, 300 + index * 200);
+      const timer = setTimeout(() => setShouldAnimateAchievements(true), 300 + index * 200);
       return () => clearTimeout(timer);
     }
   }, [isVisible, index]);
 
   return (
     <div
-      className={`relative pl-8 border-l-2 border-secondary/20 ${
-        isVisible ? "experience-timeline-enter" : "opacity-0 translate-x-[-40px]"
+      className={`relative pl-8 border-l-2 border-secondary/25 ${
+        isVisible ? "experience-timeline-enter" : "opacity-0 translate-x-[-36px]"
       }`}
-      style={{
-        animationDelay: isVisible ? `${0.3 + index * 0.25}s` : undefined,
-      }}
+      style={{ animationDelay: isVisible ? `${0.3 + index * 0.25}s` : undefined }}
     >
-      <div className="absolute -left-2 top-0 w-4 h-4 bg-secondary rounded-full"></div>
-      <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
+      <div className="absolute -left-[9px] top-0 w-4 h-4 bg-secondary rounded-full ring-4 ring-secondary/20" />
+      <Card className="glass-card glow-on-hover border-0">
         <CardContent className="p-6">
           <div className="mb-4">
-            <h4 className="text-lg font-semibold text-foreground">
-              {education.degree}
-            </h4>
+            <h4 className="text-lg font-semibold text-foreground">{education.degree}</h4>
             <p className="text-secondary font-medium">{education.school}</p>
             <p className="text-sm text-muted-foreground flex items-center">
               <Calendar className="h-4 w-4 mr-1" />
               {education.period}
             </p>
           </div>
-          <p className="text-muted-foreground leading-relaxed mb-4">
-            {education.description}
-          </p>
+          <p className="text-muted-foreground leading-relaxed mb-4">{education.description}</p>
           <div className="flex flex-wrap gap-2">
             {education.achievements.map((achievement, achievementIndex) => (
               <Badge
                 key={achievement}
                 variant="outline"
-                className={`text-xs ${
-                  shouldAnimateAchievements ? "experience-skill-enter" : "opacity-0 scale-80"
+                className={`text-xs border-secondary/20 hover:bg-secondary/10 hover:border-secondary/40 transition-colors ${
+                  shouldAnimateAchievements ? "experience-skill-enter" : "opacity-0 scale-[0.8]"
                 }`}
                 style={{
                   animationDelay: shouldAnimateAchievements
@@ -533,7 +443,7 @@ function EducationTimelineItem({
   );
 }
 
-// Contact Section Component with animations
+/* ---------- Contact Section ---------- */
 function ContactSection({
   form,
   errors,
@@ -541,20 +451,8 @@ function ContactSection({
   handleChange,
   handleSubmit,
 }: {
-  form: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    subject: string;
-    message: string;
-  };
-  errors: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    subject: string;
-    message: string;
-  };
+  form: { firstName: string; lastName: string; email: string; subject: string; message: string };
+  errors: { firstName: string; lastName: string; email: string; subject: string; message: string };
   loading: boolean;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -564,62 +462,49 @@ function ContactSection({
   const { isVisible: isFormVisible, elementRef: formRef } = useScrollAnimation();
 
   const contactInfo = [
-    {
-      icon: Mail,
-      label: "Email",
-      value: "zeeshan.haider.engineer@gmail.com",
-    },
+    { icon: Mail, label: "Email", value: "zeeshan.haider.engineer@gmail.com" },
     { icon: Phone, label: "Phone", value: "+971 58 989 0134" },
-    {
-      icon: MapPin,
-      label: "Location",
-      value: "26 A street 34 villa Abu Hail Diera, Dubai",
-    },
+    { icon: MapPin, label: "Location", value: "26 A street 34 villa Abu Hail Diera, Dubai" },
   ];
 
   return (
-    <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8">
+    <section id="contact" className="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute inset-0 -z-10 grid-bg opacity-40" />
       <div className="max-w-7xl mx-auto">
         <div ref={headingRef} className="text-center mb-16">
           <h2
             className={`text-4xl lg:text-5xl font-bold mb-6 ${
-              isHeadingVisible ? "contact-fade-in" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "contact-fade-in" : "opacity-0 translate-y-[28px]"
             }`}
           >
-            Get In{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Touch
-            </span>
+            Get In <span className="gradient-text">Touch</span>
           </h2>
           <p
-            className={`text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed ${
-              isHeadingVisible ? "contact-fade-in contact-stagger-1" : "opacity-0 translate-y-[30px]"
+            className={`text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed ${
+              isHeadingVisible ? "contact-fade-in contact-stagger-1" : "opacity-0 translate-y-[28px]"
             }`}
           >
-            Ready to start your next project? Let's discuss how I can help
-            bring your ideas to life.
+            Ready to start your next project? Let's discuss how I can help bring your ideas to life.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-16">
           <div ref={leftRef}>
             <h3
-              className={`text-2xl font-bold mb-6 text-slate-800 ${
-                isLeftVisible ? "contact-fade-in-left" : "opacity-0 translate-x-[-30px]"
+              className={`text-2xl font-bold mb-6 text-foreground ${
+                isLeftVisible ? "contact-fade-in-left" : "opacity-0 translate-x-[-28px]"
               }`}
             >
               Let's work together
             </h3>
             <p
-              className={`text-slate-600 mb-8 leading-relaxed text-lg ${
-                isLeftVisible ? "contact-fade-in-left contact-stagger-1" : "opacity-0 translate-x-[-30px]"
+              className={`text-muted-foreground mb-8 leading-relaxed text-lg ${
+                isLeftVisible ? "contact-fade-in-left contact-stagger-1" : "opacity-0 translate-x-[-28px]"
               }`}
             >
-              I'm a dedicated software engineer specializing in backend and
-              full-stack development. Whether you need to build
-              enterprise-grade solutions, modernize legacy applications, or
-              integrate complex systems, I'd love to collaborate and help
-              bring your vision to life.
+              I'm a dedicated software engineer specializing in backend and full-stack development.
+              Whether you need to build enterprise-grade solutions, modernize legacy applications, or
+              integrate complex systems, I'd love to collaborate and help bring your vision to life.
             </p>
 
             <div className="space-y-6 mb-8">
@@ -627,57 +512,43 @@ function ContactSection({
                 <div
                   key={index}
                   className={`flex items-center group ${
-                    isLeftVisible ? "contact-item-enter" : "opacity-0 translate-x-[-20px]"
+                    isLeftVisible ? "contact-item-enter" : "opacity-0 translate-x-[-18px]"
                   }`}
                   style={{
-                    animationDelay: isLeftVisible
-                      ? `${0.3 + index * 0.15}s`
-                      : undefined,
+                    animationDelay: isLeftVisible ? `${0.3 + index * 0.15}s` : undefined,
                   }}
                 >
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
-                    <contact.icon className="h-5 w-5 text-blue-600" />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mr-4 bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                    <contact.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-slate-800">
-                      {contact.label}
-                    </p>
-                    <p className="text-slate-600">{contact.value}</p>
+                    <p className="font-medium text-foreground">{contact.label}</p>
+                    <p className="text-muted-foreground break-all">{contact.value}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div
-              className={isLeftVisible ? "contact-fade-in-left contact-stagger-3" : "opacity-0 translate-x-[-30px]"}
-            >
-              <p className="font-medium text-slate-800 mb-4">Follow Me</p>
+            <div className={isLeftVisible ? "contact-fade-in-left contact-stagger-3" : "opacity-0 translate-x-[-28px]"}>
+              <p className="font-medium text-foreground mb-4">Follow Me</p>
               <div className="flex space-x-4">
                 <Button
                   variant="outline"
                   size="icon"
-                  className="hover:bg-blue-600 hover:text-white hover:scale-110 transition-all duration-300 border-blue-200 bg-transparent"
+                  className="glow-on-hover border-primary/30 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                   asChild
                 >
-                  <a
-                    href="https://github.com/iamzeeshanhaider"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
                     <Github className="h-4 w-4" />
                   </a>
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="hover:bg-blue-600 hover:text-white hover:scale-110 transition-all duration-300 border-blue-200 bg-transparent"
+                  className="glow-on-hover border-primary/30 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                   asChild
                 >
-                  <a
-                    href="https://www.linkedin.com/in/zeeshan-haider73/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href="https://www.linkedin.com/in/zeeshan-haider73/" target="_blank" rel="noopener noreferrer">
                     <Linkedin className="h-4 w-4" />
                   </a>
                 </Button>
@@ -687,18 +558,15 @@ function ContactSection({
 
           <div ref={formRef}>
             <Card
-              className={`bg-white/70 backdrop-blur-sm border-white/20 shadow-2xl ${
-                isFormVisible ? "contact-form-enter" : "opacity-0 translate-y-[40px] scale-95"
+              className={`elevated-card border-0 shadow-2xl ${
+                isFormVisible ? "contact-form-enter" : "opacity-0 translate-y-[40px] scale-[0.96]"
               }`}
             >
               <CardContent className="p-8">
                 <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label
-                        htmlFor="firstName"
-                        className="block text-sm font-medium text-slate-800 mb-2"
-                      >
+                      <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-2">
                         First Name
                       </label>
                       <Input
@@ -706,21 +574,14 @@ function ContactSection({
                         placeholder="John"
                         value={form.firstName}
                         onChange={handleChange}
-                        className={`bg-white/50 border-slate-200 ${
-                          errors.firstName ? "border-red-500" : ""
+                        className={`bg-input border-border focus:border-primary transition-colors ${
+                          errors.firstName ? "border-destructive" : ""
                         }`}
                       />
-                      {errors.firstName && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.firstName}
-                        </p>
-                      )}
+                      {errors.firstName && <p className="text-destructive text-xs mt-1">{errors.firstName}</p>}
                     </div>
                     <div>
-                      <label
-                        htmlFor="lastName"
-                        className="block text-sm font-medium text-slate-800 mb-2"
-                      >
+                      <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-2">
                         Last Name
                       </label>
                       <Input
@@ -728,23 +589,16 @@ function ContactSection({
                         placeholder="Doe"
                         value={form.lastName}
                         onChange={handleChange}
-                        className={`bg-white/50 border-slate-200 ${
-                          errors.lastName ? "border-red-500" : ""
+                        className={`bg-input border-border focus:border-primary transition-colors ${
+                          errors.lastName ? "border-destructive" : ""
                         }`}
                       />
-                      {errors.lastName && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.lastName}
-                        </p>
-                      )}
+                      {errors.lastName && <p className="text-destructive text-xs mt-1">{errors.lastName}</p>}
                     </div>
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-slate-800 mb-2"
-                    >
+                    <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                       Email
                     </label>
                     <Input
@@ -753,22 +607,15 @@ function ContactSection({
                       placeholder="john@example.com"
                       value={form.email}
                       onChange={handleChange}
-                      className={`bg-white/50 border-slate-200 ${
-                        errors.email ? "border-red-500" : ""
+                      className={`bg-input border-border focus:border-primary transition-colors ${
+                        errors.email ? "border-destructive" : ""
                       }`}
                     />
-                    {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.email}
-                      </p>
-                    )}
+                    {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="subject"
-                      className="block text-sm font-medium text-slate-800 mb-2"
-                    >
+                    <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
                       Subject
                     </label>
                     <Input
@@ -776,22 +623,15 @@ function ContactSection({
                       placeholder="Project Discussion"
                       value={form.subject}
                       onChange={handleChange}
-                      className={`bg-white/50 border-slate-200 ${
-                        errors.subject ? "border-red-500" : ""
+                      className={`bg-input border-border focus:border-primary transition-colors ${
+                        errors.subject ? "border-destructive" : ""
                       }`}
                     />
-                    {errors.subject && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.subject}
-                      </p>
-                    )}
+                    {errors.subject && <p className="text-destructive text-xs mt-1">{errors.subject}</p>}
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="message"
-                      className="block text-sm font-medium text-slate-800 mb-2"
-                    >
+                    <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
                       Message
                     </label>
                     <Textarea
@@ -799,23 +639,17 @@ function ContactSection({
                       placeholder="Tell me about your project..."
                       value={form.message}
                       onChange={handleChange}
-                      className={`min-h-[120px] bg-white/50 border-slate-200 ${
-                        errors.message ? "border-red-500" : ""
+                      className={`min-h-[120px] bg-input border-border focus:border-primary transition-colors ${
+                        errors.message ? "border-destructive" : ""
                       }`}
                     />
-                    {errors.message && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.message}
-                      </p>
-                    )}
+                    {errors.message && <p className="text-destructive text-xs mt-1">{errors.message}</p>}
                   </div>
 
                   <Button
                     type="submit"
                     disabled={loading}
-                    className={`
-                      w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg cursor-pointer disabled:cursor-not-allowed
-                    `}
+                    className="btn-gradient w-full text-white group shadow-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {loading ? "Sending..." : "Send Message"}
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -830,7 +664,7 @@ function ContactSection({
   );
 }
 
-// Testimonials Section Component with animations
+/* ---------- Testimonials ---------- */
 function TestimonialsSection() {
   const { isVisible: isHeadingVisible, elementRef: headingRef } = useScrollAnimation();
   const { isVisible: isCardsVisible, elementRef: cardsRef } = useScrollAnimation();
@@ -866,25 +700,19 @@ function TestimonialsSection() {
   ];
 
   return (
-    <section
-      id="testimonials"
-      className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50"
-    >
+    <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-7xl mx-auto">
         <div ref={headingRef} className="text-center mb-16">
           <h2
             className={`text-4xl lg:text-5xl font-bold mb-6 ${
-              isHeadingVisible ? "testimonials-fade-in" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "testimonials-fade-in" : "opacity-0 translate-y-[28px]"
             }`}
           >
-            Client{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Testimonials
-            </span>
+            Client <span className="gradient-text">Testimonials</span>
           </h2>
           <p
-            className={`text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed ${
-              isHeadingVisible ? "testimonials-fade-in testimonials-stagger-1" : "opacity-0 translate-y-[30px]"
+            className={`text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed ${
+              isHeadingVisible ? "testimonials-fade-in testimonials-stagger-1" : "opacity-0 translate-y-[28px]"
             }`}
           >
             What clients say about working with me
@@ -906,7 +734,6 @@ function TestimonialsSection() {
   );
 }
 
-// Testimonial Card Component with animations
 function TestimonialCard({
   testimonial,
   index,
@@ -925,71 +752,86 @@ function TestimonialCard({
 }) {
   return (
     <Card
-      className={`hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white/70 backdrop-blur-sm border-white/20 ${
-        isVisible ? "testimonials-card-enter" : "opacity-0 translate-y-[50px] scale-95"
+      className={`glass-card glow-on-hover border-0 ${
+        isVisible ? "testimonials-card-enter" : "opacity-0 translate-y-[50px] scale-[0.94]"
       }`}
-      style={{
-        animationDelay: isVisible ? `${0.2 + index * 0.15}s` : undefined,
-      }}
+      style={{ animationDelay: isVisible ? `${0.2 + index * 0.15}s` : undefined }}
     >
       <CardContent className="p-6">
         <div className="flex items-center mb-4">
           <img
             src={testimonial.avatar || "/placeholder.svg"}
             alt={testimonial.name}
-            className="w-12 h-12 rounded-full mr-4"
+            className="w-12 h-12 rounded-full mr-4 ring-2 ring-primary/20"
           />
           <div>
-            <h4 className="font-semibold text-slate-800">
-              {testimonial.name}
-            </h4>
-            <p className="text-sm text-slate-600">
+            <h4 className="font-semibold text-foreground">{testimonial.name}</h4>
+            <p className="text-sm text-muted-foreground">
               {testimonial.role} at {testimonial.company}
             </p>
           </div>
         </div>
         <div className="flex mb-4">
           {[...Array(testimonial.rating)].map((_, i) => (
-            <Star
-              key={i}
-              className="h-4 w-4 text-yellow-400 fill-current"
-            />
+            <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
           ))}
         </div>
-        <p className="text-slate-600 leading-relaxed italic">
-          "{testimonial.testimonial}"
-        </p>
+        <p className="text-muted-foreground leading-relaxed italic">"{testimonial.testimonial}"</p>
       </CardContent>
     </Card>
   );
 }
 
-// Projects Section Component with animations
+/* ---------- Projects Section with Tabs ---------- */
+type WebProject = {
+  title: string;
+  description: string;
+  link: string;
+  image: string;
+  tags: string[];
+  gradient: string;
+};
+
+type MobileProject = {
+  title: string;
+  description: string;
+  status: "placeholder" | "live";
+  icon: LucideIcon;
+  tags: string[];
+  gradient: string;
+  accentColor: string;
+};
+
 function ProjectsSection() {
   const { isVisible: isHeadingVisible, elementRef: headingRef } = useScrollAnimation();
   const { isVisible: isCardsVisible, elementRef: cardsRef } = useScrollAnimation();
 
-  const projects = [
+  const webProjects: WebProject[] = [
+    {
+      title: "AIVA",
+      description:
+        "AI-powered virtual assistant platform delivering conversational intelligence, natural-language workflows, and secure enterprise integrations for knowledge-heavy teams.",
+      link: "#",
+      image: "/placeholder.svg",
+      tags: ["Next.js", "Node.js", "OpenAI", "PostgreSQL", "Redis", "AWS", "WebSockets"],
+      gradient: "from-violet-500 to-fuchsia-500",
+    },
+    {
+      title: "Telehealth Platform",
+      description:
+        "HIPAA-aware telehealth platform enabling video consultations, e-prescriptions, scheduling, and patient records with end-to-end encrypted communication.",
+      link: "#",
+      image: "/placeholder.svg",
+      tags: ["Laravel", "Next.js", "WebRTC", "Twilio", "Stripe", "PostgreSQL", "AWS"],
+      gradient: "from-emerald-500 to-teal-500",
+    },
     {
       title: "Ship2World",
       description:
         "Ship2World is a data-driven logistics platform that helps eCommerce sellers ship parcels globally with end-to-end tracking and optimized rates.",
       link: "https://ship2world.co/",
       image: "/ship2world_with_bgc.png",
-      tags: [
-        "PHP",
-        "Laravel",
-        "javascript",
-        "MYSQL",
-        "AWS",
-        "Github",
-        "Bootstrap",
-        "Amazon",
-        "ebay",
-        "Etsy",
-        "Shopify",
-        "Stripe",
-      ],
+      tags: ["PHP", "Laravel", "JavaScript", "MySQL", "AWS", "Amazon", "eBay", "Shopify", "Stripe"],
       gradient: "from-red-400 to-pink-500",
     },
     {
@@ -998,15 +840,8 @@ function ProjectsSection() {
         "W-Flotte offers scenic Rhine cruises, private charters, and event trips in Düsseldorf with onboard dining and entertainment.",
       image: "/W-Flotte.png",
       link: "https://w-flotte.de/",
-      tags: [
-        "PHP",
-        "Codeignitor",
-        "Mysql",
-        "javascript",
-        "Bootstrap",
-        "AWS",
-      ],
-      gradient: "from-gray-800 to-gray-900",
+      tags: ["PHP", "CodeIgniter", "MySQL", "JavaScript", "Bootstrap", "AWS"],
+      gradient: "from-gray-700 to-gray-900",
     },
     {
       title: "RichTV",
@@ -1014,14 +849,7 @@ function ProjectsSection() {
         "A modern trading club website for stock and crypto investors, featuring custom WordPress layouts, live market data widgets, and structured content for news, rich picks, and trading education.",
       image: "/richtv.png",
       link: "https://richtv.io/",
-      tags: [
-        "PHP",
-        "WordPress",
-        "MySQL",
-        "JavaScript",
-        "REST API",
-        "TradingView",
-      ],
+      tags: ["PHP", "WordPress", "MySQL", "JavaScript", "REST API", "TradingView"],
       gradient: "from-emerald-400 to-sky-500",
     },
     {
@@ -1030,14 +858,7 @@ function ProjectsSection() {
         "A medical education platform built on WordPress, combining an online academy, articles, and product pages into a cohesive experience for future medical professionals.",
       image: "/apprentice-doctor.png",
       link: "https://theapprenticedoctor.com/",
-      tags: [
-        "PHP",
-        "WordPress",
-        "WooCommerce",
-        "MySQL",
-        "JavaScript",
-        "CSS",
-      ],
+      tags: ["PHP", "WordPress", "WooCommerce", "MySQL", "JavaScript", "CSS"],
       gradient: "from-amber-400 to-orange-500",
     },
     {
@@ -1046,16 +867,7 @@ function ProjectsSection() {
         "The Application (HBCU 20x20) is a free platform offering thousands of students access to academic and career resources, including job listings, scholarships, mock interviews, and college applications.",
       image: "/the_application.png",
       link: "http://theapplication.org/",
-      tags: [
-        "PHP",
-        "Laravel",
-        "LiveWire",
-        "Mysql",
-        "Javascript",
-        "AWS",
-        "Stripe",
-        "Bitbucket",
-      ],
+      tags: ["PHP", "Laravel", "LiveWire", "MySQL", "JavaScript", "AWS", "Stripe"],
       gradient: "from-teal-400 to-blue-500",
     },
     {
@@ -1064,19 +876,8 @@ function ProjectsSection() {
         "A clean, conversion-focused website built for photographers to easily design, price, and order custom wall art layouts with a smooth and guided workflow.",
       image: "/framesuite.png",
       link: "https://framesuite.com/",
-      tags: [
-        "PHP",
-        "Laravel",
-        "Mysql",
-        "Javascript",
-        "Reacat.js",
-        "Canvas",
-        "AWS",
-        "S3",
-        "Stripe",
-        "Bitbucket",
-      ],
-      gradient: "from-teal-400 to-blue-500",
+      tags: ["PHP", "Laravel", "MySQL", "JavaScript", "React.js", "Canvas", "AWS", "Stripe"],
+      gradient: "from-sky-400 to-indigo-500",
     },
     {
       title: "AgileMVPs",
@@ -1084,68 +885,147 @@ function ProjectsSection() {
         "A custom WordPress marketing site for an MVP development agency, with fully bespoke layouts, service pages, case studies, and lead capture forms optimized for startup clients.",
       image: "/agilemvps.png",
       link: "https://agilemvps.com/",
-      tags: [
-        "PHP",
-        "WordPress",
-        "MySQL",
-        "JavaScript",
-        "CSS",
-        "Responsive Design",
-      ],
+      tags: ["PHP", "WordPress", "MySQL", "JavaScript", "CSS", "Responsive Design"],
       gradient: "from-indigo-400 to-sky-500",
     },
   ];
 
+  const mobileProjects: MobileProject[] = [
+    {
+      title: "Healthcare Companion",
+      description:
+        "Cross-platform mobile app for medication tracking, appointment reminders, and secure chat with care teams.",
+      status: "placeholder",
+      icon: HeartPulse,
+      tags: ["React Native", "Expo", "Node.js", "Push Notifications"],
+      gradient: "from-rose-500 to-pink-500",
+      accentColor: "text-rose-400",
+    },
+    {
+      title: "Fintech Wallet",
+      description:
+        "Mobile-first wallet app with biometric auth, instant transfers, virtual cards, and real-time transaction analytics.",
+      status: "placeholder",
+      icon: BarChart3,
+      tags: ["Flutter", "Firebase", "Stripe", "Biometrics"],
+      gradient: "from-emerald-500 to-teal-500",
+      accentColor: "text-emerald-400",
+    },
+    {
+      title: "AI Productivity",
+      description:
+        "Smart productivity assistant with voice capture, AI summaries, and cross-device sync for executives on the move.",
+      status: "placeholder",
+      icon: Brain,
+      tags: ["React Native", "OpenAI", "Supabase", "Voice AI"],
+      gradient: "from-violet-500 to-indigo-500",
+      accentColor: "text-violet-400",
+    },
+    {
+      title: "Logistics Field App",
+      description:
+        "Driver & field-ops app with route optimization, offline-first capture, delivery proof, and live dispatch sync.",
+      status: "placeholder",
+      icon: Bell,
+      tags: ["React Native", "Mapbox", "SQLite", "Offline Sync"],
+      gradient: "from-amber-500 to-orange-500",
+      accentColor: "text-amber-400",
+    },
+  ];
+
   return (
-    <section id="projects" className="px-4 sm:px-6 lg:px-8">
+    <section id="projects" className="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute inset-0 -z-10 dot-bg opacity-40" />
       <div className="max-w-7xl mx-auto">
-        <div ref={headingRef} className="text-center mb-16">
+        <div ref={headingRef} className="text-center mb-12">
           <h2
             className={`text-4xl lg:text-5xl font-bold mb-6 ${
-              isHeadingVisible ? "projects-fade-in" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "projects-fade-in" : "opacity-0 translate-y-[28px]"
             }`}
           >
             Featured <span className="gradient-text">Projects</span>
           </h2>
           <p
             className={`text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed ${
-              isHeadingVisible ? "projects-fade-in projects-stagger-1" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "projects-fade-in projects-stagger-1" : "opacity-0 translate-y-[28px]"
             }`}
           >
-            Here are some of my recent projects that showcase my skills and
-            expertise
+            Enterprise-grade web platforms and mobile applications I've shipped
           </p>
         </div>
 
-        <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project, index) => (
-            <ProjectCard
-              key={index}
-              project={project}
-              index={index}
-              isVisible={isCardsVisible}
-            />
-          ))}
+        <div ref={cardsRef}>
+          <Tabs defaultValue="all" className="w-full">
+            <div className="flex justify-center mb-12">
+              <TabsList className="bg-card/60 backdrop-blur-md border border-border p-1.5 h-auto rounded-full">
+                <TabsTrigger
+                  value="all"
+                  className="rounded-full px-5 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
+                >
+                  <Layout className="h-4 w-4 mr-2" />
+                  All
+                </TabsTrigger>
+                <TabsTrigger
+                  value="web"
+                  className="rounded-full px-5 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Web
+                </TabsTrigger>
+                <TabsTrigger
+                  value="mobile"
+                  className="rounded-full px-5 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
+                >
+                  <Smartphone className="h-4 w-4 mr-2" />
+                  Mobile
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="all" className="space-y-12 mt-0">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {webProjects.map((project, index) => (
+                  <WebProjectCard key={project.title} project={project} index={index} isVisible={isCardsVisible} />
+                ))}
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-8 border-t border-border/50">
+                {mobileProjects.map((project, index) => (
+                  <MobileProjectCard key={project.title} project={project} index={index} isVisible={isCardsVisible} />
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="web" className="mt-0">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {webProjects.map((project, index) => (
+                  <WebProjectCard key={project.title} project={project} index={index} isVisible={isCardsVisible} />
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="mobile" className="mt-0">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {mobileProjects.map((project, index) => (
+                  <MobileProjectCard key={project.title} project={project} index={index} isVisible={isCardsVisible} />
+                ))}
+              </div>
+              <p className="text-center text-muted-foreground text-sm mt-8 italic">
+                Mobile application case studies — shipping soon. Screens available on request.
+              </p>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </section>
   );
 }
 
-// Project Card Component with animations
-function ProjectCard({
+function WebProjectCard({
   project,
   index,
   isVisible,
 }: {
-  project: {
-    title: string;
-    description: string;
-    link: string;
-    image: string;
-    tags: string[];
-    gradient: string;
-  };
+  project: WebProject;
   index: number;
   isVisible: boolean;
 }) {
@@ -1153,54 +1033,51 @@ function ProjectCard({
 
   useEffect(() => {
     if (isVisible) {
-      // Start tag animations after card appears
-      const timer = setTimeout(() => {
-        setShouldAnimateTags(true);
-      }, 400 + index * 100);
+      const timer = setTimeout(() => setShouldAnimateTags(true), 400 + index * 100);
       return () => clearTimeout(timer);
     }
   }, [isVisible, index]);
 
   return (
     <Card
-      className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 glass-card border-0 overflow-hidden ${
-        isVisible ? "projects-card-enter" : "opacity-0 translate-y-[60px] scale-90"
+      className={`group glass-card glow-on-hover border-0 overflow-hidden h-full flex flex-col ${
+        isVisible ? "projects-card-enter" : "opacity-0 translate-y-[50px] scale-[0.94]"
       }`}
-      style={{
-        animationDelay: isVisible ? `${0.2 + index * 0.12}s` : undefined,
-      }}
+      style={{ animationDelay: isVisible ? `${0.2 + index * 0.1}s` : undefined }}
     >
-      <div
-        className={`aspect-video bg-gradient-to-br ${project.gradient} overflow-hidden relative`}
-      >
+      <div className={`aspect-video bg-gradient-to-br ${project.gradient} overflow-hidden relative`}>
         <img
           src={project.image || "/placeholder.svg"}
           alt={project.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
         />
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+        <div className="absolute inset-0 bg-black/25 group-hover:bg-black/5 transition-colors duration-500" />
       </div>
-      <CardHeader>
+      <CardHeader className="flex-1 flex flex-col">
         <div className="flex items-center justify-between mb-2">
           <CardTitle className="group-hover:text-primary transition-colors">
             {project.title}
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hover:scale-110 transition-transform p-0 hover:bg-primary"
-            asChild
-          >
-            <a
-              href={project.link || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
+          {project.link !== "#" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:scale-110 transition-transform p-0 hover:bg-primary/10"
+              asChild
             >
-              <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-white transition-colors" />
-            </a>
-          </Button>
+              <a href={project.link} target="_blank" rel="noopener noreferrer" aria-label={`Open ${project.title}`}>
+                <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+              </a>
+            </Button>
+          )}
+          {project.link === "#" && (
+            <Badge variant="outline" className="border-accent/40 text-accent text-xs">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Private
+            </Badge>
+          )}
         </div>
-        <CardDescription className="leading-relaxed mb-4">
+        <CardDescription className="leading-relaxed mb-4 flex-1">
           {project.description}
         </CardDescription>
         <div className="flex flex-wrap gap-2">
@@ -1208,12 +1085,12 @@ function ProjectCard({
             <Badge
               key={tag}
               variant="outline"
-              className={`text-xs hover:bg-primary hover:text-primary-foreground transition-colors ${
-                shouldAnimateTags ? "projects-tag-enter" : "opacity-0 scale-80"
+              className={`text-xs border-primary/20 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors ${
+                shouldAnimateTags ? "projects-tag-enter" : "opacity-0 scale-[0.8]"
               }`}
               style={{
                 animationDelay: shouldAnimateTags
-                  ? `${0.5 + index * 0.12 + tagIndex * 0.04}s`
+                  ? `${0.5 + index * 0.1 + tagIndex * 0.04}s`
                   : undefined,
               }}
             >
@@ -1226,7 +1103,93 @@ function ProjectCard({
   );
 }
 
-// Services Section Component with animations
+function MobileProjectCard({
+  project,
+  index,
+  isVisible,
+}: {
+  project: MobileProject;
+  index: number;
+  isVisible: boolean;
+}) {
+  const [shouldAnimateTags, setShouldAnimateTags] = useState(false);
+  const Icon = project.icon;
+
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => setShouldAnimateTags(true), 400 + index * 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, index]);
+
+  return (
+    <Card
+      className={`group glass-card glow-on-hover border-0 overflow-hidden h-full flex flex-col ${
+        isVisible ? "projects-card-enter" : "opacity-0 translate-y-[50px] scale-[0.94]"
+      }`}
+      style={{ animationDelay: isVisible ? `${0.2 + index * 0.1}s` : undefined }}
+    >
+      {/* Phone mockup */}
+      <div className="relative pt-8 pb-4 flex justify-center bg-gradient-to-b from-muted/50 to-transparent">
+        <div className="phone-frame group-hover:scale-105 transition-transform duration-500 ease-out">
+          <div className="phone-notch" />
+          <div className={`phone-screen bg-gradient-to-br ${project.gradient} flex flex-col items-center justify-center p-4`}>
+            <div className="absolute inset-0 opacity-20">
+              <div className="grid-bg" style={{ backgroundSize: "16px 16px" }} />
+            </div>
+            <div className="relative flex flex-col items-center">
+              <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mb-3 ring-1 ring-white/20">
+                <Icon className="h-7 w-7 text-white" />
+              </div>
+              <div className="text-white/90 text-xs font-semibold text-center leading-tight px-2">
+                {project.title}
+              </div>
+              <div className="mt-3 flex flex-col gap-1.5 w-full px-2">
+                <div className="h-1.5 rounded-full bg-white/30 w-full" />
+                <div className="h-1.5 rounded-full bg-white/20 w-4/5" />
+                <div className="h-1.5 rounded-full bg-white/20 w-3/5" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <CardHeader className="flex-1 flex flex-col pt-2">
+        <div className="flex items-center justify-between mb-2">
+          <CardTitle className="text-base group-hover:text-primary transition-colors">
+            {project.title}
+          </CardTitle>
+          <Badge variant="outline" className="border-accent/40 text-accent text-[10px]">
+            Preview
+          </Badge>
+        </div>
+        <CardDescription className="leading-relaxed mb-4 flex-1 text-sm">
+          {project.description}
+        </CardDescription>
+        <div className="flex flex-wrap gap-1.5">
+          {project.tags.map((tag, tagIndex) => (
+            <Badge
+              key={tag}
+              variant="outline"
+              className={`text-[10px] border-primary/20 hover:bg-primary/10 transition-colors ${
+                shouldAnimateTags ? "projects-tag-enter" : "opacity-0 scale-[0.8]"
+              }`}
+              style={{
+                animationDelay: shouldAnimateTags
+                  ? `${0.5 + index * 0.1 + tagIndex * 0.04}s`
+                  : undefined,
+              }}
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </CardHeader>
+    </Card>
+  );
+}
+
+/* ---------- Services ---------- */
 function ServicesSection() {
   const { isVisible: isHeadingVisible, elementRef: headingRef } = useScrollAnimation();
   const { isVisible: isCardsVisible, elementRef: cardsRef } = useScrollAnimation();
@@ -1235,69 +1198,65 @@ function ServicesSection() {
     {
       icon: Code2,
       title: "Frontend Development",
-      description:
-        "Building responsive and interactive web applications using modern frameworks and best practices.",
+      description: "Building responsive and interactive web applications using modern frameworks and best practices.",
       gradient: "from-blue-500 to-cyan-500",
     },
     {
       icon: Server,
       title: "Backend Development",
-      description:
-        "Building secure, scalable, and high-performance backend systems with clean and efficient architecture.",
-      gradient: "from-blue-600 to-indigo-600",
+      description: "Building secure, scalable, and high-performance backend systems with clean and efficient architecture.",
+      gradient: "from-indigo-500 to-violet-500",
+    },
+    {
+      icon: Smartphone,
+      title: "Mobile Applications",
+      description: "Cross-platform mobile apps with React Native and Flutter — native performance, shared codebase.",
+      gradient: "from-rose-500 to-pink-500",
     },
     {
       icon: Globe,
       title: "Web Applications",
-      description:
-        "Full-stack web application development with modern technologies and cloud deployment.",
+      description: "Full-stack web application development with modern technologies and cloud deployment.",
       gradient: "from-orange-500 to-red-500",
     },
     {
       icon: Database,
       title: "API Integration",
-      description:
-        "Seamless integration with third-party APIs and building custom backend solutions.",
-      gradient: "from-indigo-500 to-blue-500",
+      description: "Seamless integration with third-party APIs and building custom backend solutions.",
+      gradient: "from-cyan-500 to-sky-500",
     },
     {
       icon: Zap,
       title: "Performance Optimization",
-      description:
-        "Optimizing applications for speed, SEO, and exceptional performance across all devices.",
+      description: "Optimizing applications for speed, SEO, and exceptional performance across all devices.",
       gradient: "from-yellow-500 to-orange-500",
     },
   ];
 
   return (
-    <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+    <section id="services" className="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute inset-0 -z-10 grid-bg opacity-40" />
       <div className="max-w-7xl mx-auto">
         <div ref={headingRef} className="text-center mb-16">
           <h2
             className={`text-4xl lg:text-5xl font-bold mb-6 ${
-              isHeadingVisible ? "services-fade-in" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "services-fade-in" : "opacity-0 translate-y-[28px]"
             }`}
           >
             Services & <span className="gradient-text">Expertise</span>
           </h2>
           <p
             className={`text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed ${
-              isHeadingVisible ? "services-fade-in services-stagger-1" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "services-fade-in services-stagger-1" : "opacity-0 translate-y-[28px]"
             }`}
           >
-            I offer comprehensive fullstack development services to help bring
-            your vision to life
+            I offer comprehensive fullstack development services to help bring your vision to life
           </p>
         </div>
 
         <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <ServiceCard
-              key={index}
-              service={service}
-              index={index}
-              isVisible={isCardsVisible}
-            />
+            <ServiceCard key={index} service={service} index={index} isVisible={isCardsVisible} />
           ))}
         </div>
       </div>
@@ -1305,33 +1264,25 @@ function ServicesSection() {
   );
 }
 
-// Service Card Component with animations
 function ServiceCard({
   service,
   index,
   isVisible,
 }: {
-  service: {
-    icon: LucideIcon;
-    title: string;
-    description: string;
-    gradient: string;
-  };
+  service: { icon: LucideIcon; title: string; description: string; gradient: string };
   index: number;
   isVisible: boolean;
 }) {
   return (
     <Card
-      className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 glass-card border-0 overflow-hidden ${
-        isVisible ? "services-card-enter" : "opacity-0 translate-y-[50px] scale-90"
+      className={`group glass-card glow-on-hover border-0 overflow-hidden ${
+        isVisible ? "services-card-enter" : "opacity-0 translate-y-[50px] scale-[0.94]"
       }`}
-      style={{
-        animationDelay: isVisible ? `${0.2 + index * 0.15}s` : undefined,
-      }}
+      style={{ animationDelay: isVisible ? `${0.2 + index * 0.12}s` : undefined }}
     >
       <CardHeader className="relative">
         <div
-          className={`w-16 h-16 bg-gradient-to-r ${service.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+          className={`w-16 h-16 bg-gradient-to-r ${service.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out shadow-lg`}
         >
           <service.icon className="h-8 w-8 text-white" />
         </div>
@@ -1346,7 +1297,7 @@ function ServiceCard({
   );
 }
 
-// Skills Section Component with animations
+/* ---------- Skills ---------- */
 function SkillsSection() {
   const { isVisible: isHeadingVisible, elementRef: headingRef } = useScrollAnimation();
   const { isVisible: isCardsVisible, elementRef: cardsRef } = useScrollAnimation();
@@ -1355,106 +1306,55 @@ function SkillsSection() {
     {
       category: "Backend Development",
       icon: Server,
-      skills: [
-        "PHP",
-        "WordPress",
-        "Laravel",
-        "CodeIgniter",
-        "Node.js",
-        "Nest.js",
-        "MySQL",
-        "PostgreSQL",
-      ],
+      skills: ["PHP", "WordPress", "Laravel", "CodeIgniter", "Node.js", "Nest.js", "MySQL", "PostgreSQL"],
       color: "from-blue-500 to-blue-600",
     },
     {
       category: "Frontend Development",
       icon: Monitor,
-      skills: [
-        "Next.js",
-        "React.js",
-        "Vue.js",
-        "JavaScript",
-        "TypeScript",
-        "Tailwind CSS",
-        "Bootstrap",
-      ],
+      skills: ["Next.js", "React.js", "Vue.js", "JavaScript", "TypeScript", "Tailwind CSS", "Bootstrap"],
       color: "from-indigo-500 to-indigo-600",
+    },
+    {
+      category: "Mobile Development",
+      icon: Smartphone,
+      skills: ["React Native", "Expo", "Flutter", "Push Notifications", "Biometrics", "Offline-First"],
+      color: "from-rose-500 to-pink-500",
     },
     {
       category: "DevOps & Tools",
       icon: Settings,
-      skills: [
-        "Docker",
-        "CI/CD",
-        "Jenkins",
-        "AWS EC2",
-        "AWS S3",
-        "Git",
-        "Linux",
-      ],
+      skills: ["Docker", "CI/CD", "Jenkins", "AWS EC2", "AWS S3", "Git", "Linux"],
       color: "from-purple-500 to-purple-600",
     },
     {
       category: "Integrations",
       icon: Layers,
-      skills: [
-        "Stripe",
-        "PayPal",
-        "SendGrid",
-        "ActiveCampaign",
-        "REST APIs",
-        "OLO",
-        "GraphQL",
-        "GHL",
-      ],
-      color: "from-green-500 to-green-600",
-    },
-    {
-      category: "Databases",
-      icon: Database,
-      skills: [
-        "MySQL",
-        "PostgreSQL",
-        "MongoDB",
-        "Redis",
-        "Database Design",
-        "Query Optimization",
-      ],
-      color: "from-orange-500 to-orange-600",
+      skills: ["Stripe", "PayPal", "SendGrid", "ActiveCampaign", "REST APIs", "OLO", "GraphQL", "GHL"],
+      color: "from-emerald-500 to-green-600",
     },
     {
       category: "Architecture",
       icon: Cpu,
-      skills: [
-        "Microservices",
-        "MVC",
-        "RESTful APIs",
-        "System Design",
-        "Performance Optimization",
-        "Security",
-      ],
-      color: "from-red-500 to-red-600",
+      skills: ["Microservices", "MVC", "RESTful APIs", "System Design", "Performance", "Security"],
+      color: "from-orange-500 to-red-500",
     },
   ];
 
   return (
-    <section id="skills" className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50">
+    <section id="skills" className="py-24 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-7xl mx-auto">
         <div ref={headingRef} className="text-center mb-16">
           <h2
             className={`text-4xl lg:text-5xl font-bold mb-6 ${
-              isHeadingVisible ? "skills-fade-in" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "skills-fade-in" : "opacity-0 translate-y-[28px]"
             }`}
           >
-            Technical{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Skills
-            </span>
+            Technical <span className="gradient-text">Skills</span>
           </h2>
           <p
-            className={`text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed ${
-              isHeadingVisible ? "skills-fade-in skills-stagger-1" : "opacity-0 translate-y-[30px]"
+            className={`text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed ${
+              isHeadingVisible ? "skills-fade-in skills-stagger-1" : "opacity-0 translate-y-[28px]"
             }`}
           >
             Comprehensive expertise across the full development stack
@@ -1463,12 +1363,7 @@ function SkillsSection() {
 
         <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {skillGroups.map((skillGroup, index) => (
-            <SkillCard
-              key={index}
-              skillGroup={skillGroup}
-              index={index}
-              isVisible={isCardsVisible}
-            />
+            <SkillCard key={index} skillGroup={skillGroup} index={index} isVisible={isCardsVisible} />
           ))}
         </div>
       </div>
@@ -1476,18 +1371,12 @@ function SkillsSection() {
   );
 }
 
-// Skill Card Component with animations
 function SkillCard({
   skillGroup,
   index,
   isVisible,
 }: {
-  skillGroup: {
-    category: string;
-    icon: LucideIcon;
-    skills: string[];
-    color: string;
-  };
+  skillGroup: { category: string; icon: LucideIcon; skills: string[]; color: string };
   index: number;
   isVisible: boolean;
 }) {
@@ -1495,30 +1384,25 @@ function SkillCard({
 
   useEffect(() => {
     if (isVisible) {
-      // Start badge animations after card appears
-      const timer = setTimeout(() => {
-        setShouldAnimateBadges(true);
-      }, 300 + index * 100);
+      const timer = setTimeout(() => setShouldAnimateBadges(true), 300 + index * 100);
       return () => clearTimeout(timer);
     }
   }, [isVisible, index]);
 
   return (
     <Card
-      className={`group hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white/70 backdrop-blur-sm border-white/20 ${
-        isVisible ? "skills-card-enter" : "opacity-0 translate-y-[40px] scale-95"
+      className={`group glass-card glow-on-hover border-0 ${
+        isVisible ? "skills-card-enter" : "opacity-0 translate-y-[40px] scale-[0.96]"
       }`}
-      style={{
-        animationDelay: isVisible ? `${0.2 + index * 0.1}s` : undefined,
-      }}
+      style={{ animationDelay: isVisible ? `${0.2 + index * 0.1}s` : undefined }}
     >
       <CardHeader>
         <div
-          className={`w-16 h-16 bg-gradient-to-r ${skillGroup.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
+          className={`w-16 h-16 bg-gradient-to-r ${skillGroup.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out shadow-lg`}
         >
           <skillGroup.icon className="h-8 w-8 text-white" />
         </div>
-        <CardTitle className="text-xl group-hover:text-blue-600 transition-colors">
+        <CardTitle className="text-xl group-hover:text-primary transition-colors">
           {skillGroup.category}
         </CardTitle>
       </CardHeader>
@@ -1528,8 +1412,8 @@ function SkillCard({
             <Badge
               key={skill}
               variant="outline"
-              className={`text-xs hover:bg-blue-50 hover:border-blue-200 transition-colors ${
-                shouldAnimateBadges ? "skills-badge-enter" : "opacity-0 scale-80"
+              className={`text-xs border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-colors ${
+                shouldAnimateBadges ? "skills-badge-enter" : "opacity-0 scale-[0.8]"
               }`}
               style={{
                 animationDelay: shouldAnimateBadges
@@ -1546,7 +1430,7 @@ function SkillCard({
   );
 }
 
-// About Me Section Component with animations
+/* ---------- About Me ---------- */
 function AboutMeSection() {
   const { isVisible: isSectionVisible, elementRef: sectionRef } = useScrollAnimation();
   const { isVisible: isHeadingVisible, elementRef: headingRef } = useScrollAnimation();
@@ -1554,105 +1438,77 @@ function AboutMeSection() {
   const { isVisible: isRightVisible, elementRef: rightRef } = useScrollAnimation();
 
   return (
-    <section id="about" ref={sectionRef} className="py-20 px-4 sm:px-6 lg:px-8">
+    <section id="about" ref={sectionRef} className="py-24 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-7xl mx-auto">
         <div ref={headingRef} className="text-center mb-16">
           <h2
             className={`text-4xl lg:text-5xl font-bold mb-6 ${
-              isHeadingVisible ? "about-fade-in" : "opacity-0 translate-y-[30px]"
+              isHeadingVisible ? "about-fade-in" : "opacity-0 translate-y-[28px]"
             }`}
           >
-            About{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Me
-            </span>
+            About <span className="gradient-text">Me</span>
           </h2>
           <p
-            className={`text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed ${
-              isHeadingVisible ? "about-fade-in about-stagger-1" : "opacity-0 translate-y-[30px]"
+            className={`text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed ${
+              isHeadingVisible ? "about-fade-in about-stagger-1" : "opacity-0 translate-y-[28px]"
             }`}
           >
-            Passionate about creating scalable solutions that drive business
-            growth and deliver exceptional user experiences.
+            Passionate about creating scalable solutions that drive business growth and deliver exceptional user experiences.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div ref={leftRef}>
             <p
-              className={`text-slate-600 mb-6 leading-relaxed text-lg ${
-                isLeftVisible ? "about-fade-in-left about-stagger-1" : "opacity-0 translate-x-[-30px]"
+              className={`text-muted-foreground mb-6 leading-relaxed text-lg ${
+                isLeftVisible ? "about-fade-in-left about-stagger-1" : "opacity-0 translate-x-[-28px]"
               }`}
             >
-              I'm a <strong>Senior Software Engineer</strong> with 5+ years of
-              experience designing and building web applications, APIs, and
-              database-driven systems. My main focus is backend engineering
-              with Laravel/PHP and JavaScript (Node.js, NestJS), combined with
-              modern frontends in Vue.js and React.
+              I'm a <strong className="text-foreground">Senior Software Engineer</strong> with 5+ years of
+              experience designing and building web applications, APIs, and database-driven systems. My main focus
+              is backend engineering with Laravel/PHP and JavaScript (Node.js, NestJS), combined with modern
+              frontends in Vue.js and React.
             </p>
 
             <p
-              className={`text-slate-600 mb-6 leading-relaxed text-lg ${
-                isLeftVisible ? "about-fade-in-left about-stagger-2" : "opacity-0 translate-x-[-30px]"
+              className={`text-muted-foreground mb-6 leading-relaxed text-lg ${
+                isLeftVisible ? "about-fade-in-left about-stagger-2" : "opacity-0 translate-x-[-28px]"
               }`}
             >
-              I've worked across logistics, healthcare, fintech, POS, and SaaS
-              platforms—designing architectures, optimising performance with
-              Redis caching and query tuning, and implementing secure payment
-              and wallet flows. I'm comfortable owning features end-to-end:
-              from requirements and system design to implementation, testing,
-              deployment, and production troubleshooting.
+              I've worked across logistics, healthcare, fintech, POS, and SaaS platforms — designing architectures,
+              optimising performance with Redis caching and query tuning, and implementing secure payment and wallet
+              flows. I'm comfortable owning features end-to-end: from requirements and system design to
+              implementation, testing, deployment, and production troubleshooting.
             </p>
 
             <p
-              className={`text-slate-600 mb-8 leading-relaxed text-lg ${
-                isLeftVisible ? "about-fade-in-left about-stagger-3" : "opacity-0 translate-x-[-30px]"
+              className={`text-muted-foreground mb-8 leading-relaxed text-lg ${
+                isLeftVisible ? "about-fade-in-left about-stagger-3" : "opacity-0 translate-x-[-28px]"
               }`}
             >
-              I enjoy leading and mentoring within small teams, reviewing code
-              for quality, and collaborating closely with product, QA, and
-              stakeholders to ship reliable software that solves real business
-              problems.
+              I enjoy leading and mentoring within small teams, reviewing code for quality, and collaborating closely
+              with product, QA, and stakeholders to ship reliable software that solves real business problems.
             </p>
 
             <div
               className={`mb-8 ${
-                isLeftVisible ? "about-fade-in-left about-stagger-4" : "opacity-0 translate-x-[-30px]"
+                isLeftVisible ? "about-fade-in-left about-stagger-4" : "opacity-0 translate-x-[-28px]"
               }`}
             >
-              <h3 className="text-xl font-semibold mb-4 text-slate-800">
-                Core Technologies
-              </h3>
+              <h3 className="text-xl font-semibold mb-4 text-foreground">Core Technologies</h3>
               <div className="flex flex-wrap gap-3">
                 {[
-                  "PHP",
-                  "WordPress",
-                  "Laravel",
-                  "CodeIgniter",
-                  "JavaScript",
-                  "Node.js",
-                  "Nest.js",
-                  "Next.js",
-                  "React.js",
-                  "Vue.js",
-                  "Livewire",
-                  "Bootstrap",
-                  "Tailwind",
-                  "Docker",
-                  "AWS",
-                  "MySQL",
-                  "Postgress",
+                  "PHP", "WordPress", "Laravel", "CodeIgniter", "JavaScript", "Node.js", "Nest.js", "Next.js",
+                  "React.js", "Vue.js", "React Native", "Livewire", "Tailwind", "Docker", "AWS", "MySQL", "PostgreSQL",
                 ].map((tech, index) => (
                   <Badge
                     key={tech}
                     variant="secondary"
-                    className={`px-4 py-2 text-sm hover:bg-blue-600 hover:text-white transition-colors bg-blue-50 text-blue-700 border-blue-200 ${
-                      isLeftVisible ? "about-scale-in" : "opacity-0 scale-75"
+                    className={`px-4 py-2 text-sm hover:bg-primary hover:text-primary-foreground transition-colors bg-primary/10 text-primary border-primary/20 ${
+                      isLeftVisible ? "about-scale-in" : "opacity-0 scale-[0.75]"
                     }`}
                     style={{
-                      animationDelay: isLeftVisible
-                        ? `${0.7 + index * 0.15}s`
-                        : undefined,
+                      animationDelay: isLeftVisible ? `${0.7 + index * 0.08}s` : undefined,
                     }}
                   >
                     {tech}
@@ -1661,13 +1517,8 @@ function AboutMeSection() {
               </div>
             </div>
 
-            <div
-              className={isLeftVisible ? "about-fade-in-left about-stagger-5" : "opacity-0 translate-x-[-30px]"}
-            >
-              <Button
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
-                asChild
-              >
+            <div className={isLeftVisible ? "about-fade-in-left about-stagger-5" : "opacity-0 translate-x-[-28px]"}>
+              <Button className="btn-gradient text-white group shadow-lg" asChild>
                 <a href="/Zeeshan Haider.pdf" download>
                   Download Resume
                   <Download className="h-4 w-4 ml-2 group-hover:translate-y-1 transition-transform" />
@@ -1678,11 +1529,7 @@ function AboutMeSection() {
 
           <div ref={rightRef} className="grid grid-cols-2 gap-6">
             {[
-              {
-                icon: TrendingUp,
-                label: "Workflow Efficiency",
-                value: "40%",
-              },
+              { icon: TrendingUp, label: "Workflow Efficiency", value: "40%" },
               { icon: Shield, label: "Security Focus", value: "100%" },
               { icon: Rocket, label: "Project Success", value: "98%" },
               { icon: Heart, label: "Client Reviews", value: "5★" },
@@ -1703,6 +1550,7 @@ function AboutMeSection() {
   );
 }
 
+/* ---------- Main Page ---------- */
 export default function ZeeshanPortfolio() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
@@ -1722,25 +1570,16 @@ export default function ZeeshanPortfolio() {
   });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setForm({ ...form, [id]: value });
-    // Clear the error for the field being edited
     if (errors[id as keyof typeof errors]) {
       setErrors({ ...errors, [id]: "" });
     }
   };
 
   const validateForm = () => {
-    const newErrors = {
-      firstName: "",
-      lastName: "",
-      email: "",
-      subject: "",
-      message: "",
-    };
+    const newErrors = { firstName: "", lastName: "", email: "", subject: "", message: "" };
     let isValid = true;
 
     if (!form.firstName.trim()) {
@@ -1773,10 +1612,7 @@ export default function ZeeshanPortfolio() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
@@ -1788,18 +1624,12 @@ export default function ZeeshanPortfolio() {
 
       if (res.ok) {
         toast.success("Message sent successfully!");
-        setForm({
-          firstName: "",
-          lastName: "",
-          email: "",
-          subject: "",
-          message: "",
-        });
+        setForm({ firstName: "", lastName: "", email: "", subject: "", message: "" });
       } else {
         const errorData = await res.json().catch(() => ({}));
         toast.error(errorData.error || "Failed to send message.");
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred. Please try again later.");
     } finally {
       setLoading(false);
@@ -1808,52 +1638,59 @@ export default function ZeeshanPortfolio() {
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const navScrolled = scrollY > 20;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50">
+    <div className="min-h-screen relative overflow-x-hidden">
+      {/* Global background orbs */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <div className="orb orb-blue w-[480px] h-[480px] -top-40 -left-40" />
+        <div className="orb orb-indigo w-[560px] h-[560px] top-1/3 -right-48" />
+        <div className="orb orb-cyan w-[420px] h-[420px] bottom-0 left-1/4" />
+      </div>
+
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/50 z-50 transition-all duration-300 shadow-sm">
+      <nav
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+          navScrolled
+            ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-sm"
+            : "bg-transparent"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">Z</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-primary via-secondary to-accent rounded-xl flex items-center justify-center shadow-lg relative overflow-hidden">
+                <span className="text-white font-bold text-lg relative z-10">Z</span>
+                <div className="absolute inset-0 shimmer" />
               </div>
-              <div className="font-bold text-xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Zeeshan Haider
-              </div>
+              <div className="font-bold text-xl gradient-text">Zeeshan Haider</div>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex space-x-8">
-              {[
-                "About",
-                "Services",
-                "Skills",
-                "Projects",
-                "Experience",
-                "Testimonials",
-                "Contact",
-              ].map((item) => (
+              {["About", "Services", "Skills", "Projects", "Experience", "Testimonials", "Contact"].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-105 font-medium relative group"
+                  className="text-muted-foreground hover:text-primary transition-all duration-300 font-medium relative group text-sm"
                 >
                   {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all duration-500 group-hover:w-full" />
                 </a>
               ))}
             </div>
 
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-3">
+              <ThemeToggle />
               <Button
                 variant="outline"
                 size="sm"
-                className="hover:bg-blue-600 hover:text-white transition-all duration-300 border-blue-200 text-blue-600 bg-transparent"
+                className="border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground bg-transparent transition-all duration-300"
                 asChild
               >
                 <a href="/Zeeshan Haider.pdf" download>
@@ -1861,70 +1698,43 @@ export default function ZeeshanPortfolio() {
                   Resume
                 </a>
               </Button>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
-              >
-                <a href="#contact" className="flex items-center">
-                  Let's Connect
-                </a>
+              <Button size="sm" className="btn-gradient text-white shadow-lg">
+                <a href="#contact">Let's Connect</a>
               </Button>
             </div>
 
             {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
+            <div className="md:hidden flex items-center gap-2">
+              <ThemeToggle />
+              <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </div>
           </div>
 
           {/* Mobile Navigation */}
           {isMenuOpen && (
-            <div className="md:hidden py-4 border-t border-slate-200/50">
+            <div className="md:hidden py-4 border-t border-border">
               <div className="flex flex-col space-y-4">
-                {[
-                  "About",
-                  "Services",
-                  "Skills",
-                  "Projects",
-                  "Experience",
-                  "Testimonials",
-                  "Contact",
-                ].map((item) => (
+                {["About", "Services", "Skills", "Projects", "Experience", "Testimonials", "Contact"].map((item) => (
                   <a
                     key={item}
                     href={`#${item.toLowerCase()}`}
-                    className="text-slate-600 hover:text-blue-600 transition-colors font-medium"
+                    className="text-muted-foreground hover:text-primary transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item}
                   </a>
                 ))}
                 <div className="flex space-x-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 bg-transparent"
-                    asChild
-                  >
+                  <Button variant="outline" size="sm" className="flex-1 bg-transparent" asChild>
                     <a href="/Zeeshan Haider.pdf" download>
                       <Download className="h-4 w-4 mr-2" />
                       Resume
                     </a>
                   </Button>
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600"
-                  >
-                    Hire Me
+                  <Button size="sm" className="flex-1 btn-gradient text-white">
+                    <a href="#contact">Hire Me</a>
                   </Button>
                 </div>
               </div>
@@ -1935,45 +1745,34 @@ export default function ZeeshanPortfolio() {
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div
-            className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "2s" }}
-          ></div>
-        </div>
+        <div className="absolute inset-0 -z-10 grid-bg" />
 
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="fade-in-up">
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium mb-6">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                Available for opportunities
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 text-sm font-medium mb-6 border border-emerald-500/20">
+                <span className="relative flex w-2 h-2 mr-2">
+                  <span className="pulse-dot absolute inline-flex w-full h-full rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500" />
+                </span>
+                Available for enterprise engagements
               </div>
 
-              <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-balance">
-                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Zeeshan Haider
-                </span>
+              <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-balance leading-[1.05]">
+                <span className="gradient-text">Zeeshan Haider</span>
               </h1>
 
-              <p className="text-2xl text-slate-600 mb-4 font-medium">
-                Senior Software Engineer (PHP / JavaScript)
+              <p className="text-2xl text-foreground/90 mb-4 font-medium">
+                Senior Software Engineer · Web & Mobile
               </p>
 
-              <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-xl">
-               
-                I build scalable web applications, APIs, and platforms using
-                Laravel, Node.js, React.js, and PostgreSQL. Experience across
-                POS, marketplaces, logistics, and SaaS products.
+              <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-xl">
+                I architect and ship scalable web platforms, mobile applications, and APIs for enterprises — with
+                Laravel, Node.js, Next.js, React Native, and cloud-native infrastructure.
               </p>
 
               <div className="flex flex-wrap gap-4 mb-8">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 group shadow-lg"
-                >
+                <Button size="lg" className="btn-gradient text-white group shadow-xl" asChild>
                   <a href="#projects" className="flex items-center">
                     View My Work
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -1982,71 +1781,71 @@ export default function ZeeshanPortfolio() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="hover:bg-blue-600 hover:text-white border-blue-200 text-blue-600 bg-transparent"
+                  className="border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground bg-transparent transition-all duration-300"
+                  asChild
                 >
-                  <a href="#contact" className="flex items-center">
-                    Let's Connect
-                  </a>
+                  <a href="#contact">Let's Connect</a>
                 </Button>
               </div>
-              <div className="flex space-x-4">
+
+              <div className="flex space-x-3">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hover:bg-blue-100 hover:text-blue-600 hover:scale-110 transition-all duration-300"
+                  className="hover:bg-primary/10 hover:text-primary hover:scale-110 transition-all duration-300"
                   asChild
                 >
-                  <a
-                    href="https://github.com/iamzeeshanhaider"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
                     <Github className="h-5 w-5" />
                   </a>
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hover:bg-blue-100 hover:text-blue-600 hover:scale-110 transition-all duration-300"
+                  className="hover:bg-primary/10 hover:text-primary hover:scale-110 transition-all duration-300"
                   asChild
                 >
-                  <a
-                    href="https://www.linkedin.com/in/zeeshan-haider73/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href="https://www.linkedin.com/in/zeeshan-haider73/" target="_blank" rel="noopener noreferrer">
                     <Linkedin className="h-5 w-5" />
                   </a>
                 </Button>
               </div>
             </div>
 
-            <div className="relative fade-in-up">
+            <div className="relative fade-in-up stagger-2">
               <div className="relative">
-                <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 p-1 shadow-2xl">
-                  <div className="w-full h-full rounded-3xl overflow-hidden">
+                {/* Decorative glow ring */}
+                <div
+                  className="absolute inset-0 rounded-3xl blur-2xl opacity-60"
+                  style={{
+                    background: "conic-gradient(from 0deg, #2563eb, #06b6d4, #8b5cf6, #2563eb)",
+                    animation: "gradientShift 6s linear infinite",
+                  }}
+                />
+                <div className="aspect-square rounded-3xl overflow-hidden elevated-card p-1 shadow-2xl relative">
+                  <div className="w-full h-full rounded-[calc(var(--radius)+4px)] overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20">
                     <img
                       src="/software-engineer-headshot.png"
-                      alt="Zeeshan Haider - Senior Software Engineer - Laravel Developer - Api Developer"
+                      alt="Zeeshan Haider - Senior Software Engineer"
                       className="w-full h-full object-cover"
                     />
                   </div>
                 </div>
 
                 {/* Floating Stats Cards */}
-                <div className="absolute -top-6 -right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20 float-1">
-                  <div className="text-2xl font-bold text-blue-600">5+</div>
-                  <div className="text-xs text-slate-600">Years Exp</div>
+                <div className="absolute -top-6 -right-6 glass-card rounded-2xl p-4 text-center shadow-xl float-1">
+                  <div className="text-2xl font-bold gradient-text">5+</div>
+                  <div className="text-xs text-muted-foreground">Years Exp</div>
                 </div>
 
-                <div className="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20 float-2">
-                  <div className="text-2xl font-bold text-indigo-600">30+</div>
-                  <div className="text-xs text-slate-600">Projects</div>
+                <div className="absolute -bottom-6 -left-6 glass-card rounded-2xl p-4 text-center shadow-xl float-2">
+                  <div className="text-2xl font-bold gradient-text">30+</div>
+                  <div className="text-xs text-muted-foreground">Projects</div>
                 </div>
 
-                <div className="absolute top-1/2 -left-8 bg-white/90 backdrop-blur-sm rounded-2xl p-4 text-center shadow-xl border border-white/20 float-3">
-                  <div className="text-2xl font-bold text-green-600">40%</div>
-                  <div className="text-xs text-slate-600">Efficiency</div>
+                <div className="absolute top-1/2 -left-8 glass-card rounded-2xl p-4 text-center shadow-xl float-3">
+                  <div className="text-2xl font-bold text-emerald-500">40%</div>
+                  <div className="text-xs text-muted-foreground">Efficiency</div>
                 </div>
               </div>
             </div>
@@ -2055,40 +1854,18 @@ export default function ZeeshanPortfolio() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              {
-                icon: Briefcase,
-                value: "5+",
-                label: "Years Experience",
-                color: "text-blue-600",
-              },
-              {
-                icon: Code2,
-                value: "30+",
-                label: "Projects Completed",
-                color: "text-indigo-600",
-              },
-              {
-                icon: Users,
-                value: "25+",
-                label: "Happy Clients",
-                color: "text-green-600",
-              },
-              {
-                icon: Award,
-                value: "98%",
-                label: "Client Satisfaction",
-                color: "text-purple-600",
-              },
+              { icon: Briefcase, value: "5+", label: "Years Experience", color: "from-blue-500 to-cyan-500" },
+              { icon: Code2, value: "30+", label: "Projects Completed", color: "from-indigo-500 to-violet-500" },
+              { icon: Users, value: "25+", label: "Happy Clients", color: "from-emerald-500 to-teal-500" },
+              { icon: Award, value: "98%", label: "Client Satisfaction", color: "from-rose-500 to-pink-500" },
             ].map((stat, index) => {
-              // Parse value to extract number and suffix
               const match = stat.value.match(/(\d+)(.*)/);
               const number = match ? parseInt(match[1], 10) : 0;
               const suffix = match ? match[2] : "";
-              
               return (
                 <StatCard
                   key={index}
@@ -2105,18 +1882,10 @@ export default function ZeeshanPortfolio() {
         </div>
       </section>
 
-      {/* About Me Section */}
       <AboutMeSection />
-
       <SkillsSection />
-
-      {/* Services Section */}
       <ServicesSection />
-
-      {/* Projects Section */}
       <ProjectsSection />
-
-      {/* Experience Section */}
       <ExperienceSection />
       <TestimonialsSection />
 
@@ -2129,48 +1898,28 @@ export default function ZeeshanPortfolio() {
       />
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-background/80 backdrop-blur-xl border-t border-border py-16 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary via-secondary to-accent rounded-xl flex items-center justify-center">
                   <span className="text-white font-bold text-lg">Z</span>
                 </div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                  Zeeshan Haider
-                </h3>
+                <h3 className="text-2xl font-bold gradient-text">Zeeshan Haider</h3>
               </div>
-              <p className="text-slate-300 mb-6 leading-relaxed">
-                Passionate Senior Software Engineer crafting scalable web
-                applications and meaningful digital experiences.
+              <p className="text-muted-foreground mb-6 leading-relaxed max-w-md">
+                Senior Software Engineer crafting scalable web platforms, mobile applications, and meaningful digital
+                experiences for enterprises worldwide.
               </p>
-              <div className="flex space-x-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-slate-300 hover:text-white hover:bg-slate-800"
-                  asChild
-                >
-                  <a
-                    href="https://github.com/iamzeeshanhaider"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+              <div className="flex space-x-3">
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary" asChild>
+                  <a href="https://github.com/iamzeeshanhaider" target="_blank" rel="noopener noreferrer">
                     <Github className="h-4 w-4" />
                   </a>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-slate-300 hover:text-white hover:bg-slate-800"
-                  asChild
-                >
-                  <a
-                    href="https://www.linkedin.com/in/zeeshan-haider73/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary" asChild>
+                  <a href="https://www.linkedin.com/in/zeeshan-haider73/" target="_blank" rel="noopener noreferrer">
                     <Linkedin className="h-4 w-4" />
                   </a>
                 </Button>
@@ -2178,28 +1927,23 @@ export default function ZeeshanPortfolio() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-slate-300">
-                {["About", "Services", "Skills", "Projects", "Contact"].map(
-                  (link) => (
-                    <li key={link}>
-                      <a
-                        href={`#${link.toLowerCase()}`}
-                        className="hover:text-white transition-colors"
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  )
-                )}
+              <h4 className="font-semibold mb-4 text-foreground">Quick Links</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                {["About", "Services", "Skills", "Projects", "Contact"].map((link) => (
+                  <li key={link}>
+                    <a href={`#${link.toLowerCase()}`} className="hover:text-primary transition-colors">
+                      {link}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Services</h4>
-              <ul className="space-y-2 text-slate-300">
+              <h4 className="font-semibold mb-4 text-foreground">Services</h4>
+              <ul className="space-y-2 text-muted-foreground">
                 <li>Full-Stack Development</li>
-                <li>Laravel Applications</li>
+                <li>Mobile Applications</li>
                 <li>Enterprise Solutions</li>
                 <li>API Integrations</li>
                 <li>System Architecture</li>
@@ -2207,11 +1951,8 @@ export default function ZeeshanPortfolio() {
             </div>
           </div>
 
-          <div className="border-t border-slate-800 pt-8 text-center text-slate-400">
-            <p>
-              &copy; 2025 Zeeshan Haider. All rights reserved. Built with
-              passion and expertise.
-            </p>
+          <div className="border-t border-border pt-8 text-center text-muted-foreground">
+            <p>&copy; 2026 Zeeshan Haider. All rights reserved. Built with passion and expertise.</p>
           </div>
         </div>
       </footer>
