@@ -18,8 +18,8 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Zeeshan Haider - Senior Software Engineer | Full Stack Developer Dubai",
-  description: "Senior Software Engineer with 5+ years of experience in PHP, Laravel, Next.js, and modern full-stack development. Expert in building scalable web applications and enterprise solutions in Dubai, UAE.",
+  title: "Zeeshan Haider - Solution Engineer | AI, Web & Mobile | Dubai",
+  description: "Solution Engineer with 7+ years of experience building AI-powered products, web platforms, and mobile applications for enterprises. Expert in LLMs, Laravel, Next.js, React Native, and cloud-native architecture in Dubai, UAE.",
   generator: "Next.js",
   keywords: [
     "Zeeshan Haider",
@@ -142,8 +142,9 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange={false}
+          enableSystem={false}
+          disableTransitionOnChange
+          storageKey="zh-theme"
         >
           <Toaster position="top-right" richColors theme="system" />
           {children}

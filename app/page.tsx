@@ -73,61 +73,41 @@ function StatCard({
   color: string;
   delay: number;
 }) {
-  const [isVisible, setIsVisible] = useState(false);
   const [shouldCount, setShouldCount] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const hasTriggeredRef = useRef(false);
 
   useEffect(() => {
-    let observer: IntersectionObserver | null = null;
-    let scrollHandler: (() => void) | null = null;
+    const node = cardRef.current;
+    if (!node) return;
 
-    const initTimeout = setTimeout(() => {
-      if (!cardRef.current) return;
-
-      const rect = cardRef.current.getBoundingClientRect();
-      const isInViewportOnLoad =
-        rect.top >= 0 && rect.top < window.innerHeight && window.scrollY === 0;
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting && !hasTriggeredRef.current) {
-              hasTriggeredRef.current = true;
-              setIsVisible(true);
-              setTimeout(() => setShouldAnimate(true), 50);
-              setTimeout(() => setShouldCount(true), delay * 1000 + 500);
-            }
-          });
-        },
-        { threshold: 0.1, rootMargin: "0px 0px -10% 0px" }
-      );
-
-      if (isInViewportOnLoad) {
-        scrollHandler = () => {
-          if (
-            window.scrollY > 50 &&
-            !hasTriggeredRef.current &&
-            cardRef.current &&
-            observer
-          ) {
-            observer.observe(cardRef.current);
-            window.removeEventListener("scroll", scrollHandler!);
-            scrollHandler = null;
-          }
-        };
-        window.addEventListener("scroll", scrollHandler, { passive: true });
-      } else if (cardRef.current) {
-        observer.observe(cardRef.current);
-      }
-    }, 100);
-
-    return () => {
-      clearTimeout(initTimeout);
-      if (scrollHandler) window.removeEventListener("scroll", scrollHandler);
-      if (observer && cardRef.current) observer.unobserve(cardRef.current);
+    const trigger = () => {
+      if (hasTriggeredRef.current) return;
+      hasTriggeredRef.current = true;
+      setTimeout(() => setShouldAnimate(true), 50);
+      setTimeout(() => setShouldCount(true), delay * 1000 + 500);
     };
+
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      trigger();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            trigger();
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -10% 0px" }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
   }, [delay]);
 
   const { displayValue } = useCountUp({
@@ -649,7 +629,7 @@ function ContactSection({
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="btn-gradient w-full text-white group shadow-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+                    className="btn-gradient w-full group shadow-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {loading ? "Sending..." : "Send Message"}
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -782,6 +762,26 @@ function TestimonialCard({
   );
 }
 
+/* ---------- Store brand icons (inline SVG for recognizability) ---------- */
+function GooglePlayIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path fill="#00D09D" d="M3.61 1.81A2 2 0 0 0 3 3.24v17.52a2 2 0 0 0 .6 1.43l.08.07L13.3 12.08v-.16L3.69 1.74l-.08.07z" />
+      <path fill="#FFCE00" d="M16.5 15.28 13.3 12.08v-.16l3.2-3.2.07.04 3.79 2.16c1.08.61 1.08 1.62 0 2.24l-3.79 2.16-.07.04z" />
+      <path fill="#FF3C41" d="M16.57 15.24 13.3 11.97 3.61 21.67a1.63 1.63 0 0 0 2.08.06l10.88-6.49z" />
+      <path fill="#00A3FF" d="M16.57 8.76 5.69 2.27A1.63 1.63 0 0 0 3.61 2.33L13.3 12.03l3.27-3.27z" />
+    </svg>
+  );
+}
+
+function AppStoreIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
+      <path d="M17.05 12.54c-.03-2.82 2.3-4.18 2.41-4.25-1.31-1.92-3.36-2.18-4.09-2.21-1.74-.18-3.4 1.03-4.29 1.03-.9 0-2.25-1-3.71-.98-1.9.03-3.66 1.11-4.64 2.81-1.99 3.44-.51 8.53 1.41 11.33.95 1.37 2.08 2.91 3.56 2.86 1.43-.06 1.97-.93 3.7-.93s2.22.93 3.72.9c1.54-.03 2.51-1.4 3.44-2.78 1.09-1.59 1.54-3.13 1.56-3.21-.03-.01-2.99-1.15-3.03-4.57Z M14.39 4.38c.79-.96 1.32-2.29 1.17-3.62-1.14.05-2.52.76-3.34 1.71-.73.84-1.37 2.2-1.2 3.5 1.27.1 2.57-.64 3.37-1.59Z" />
+    </svg>
+  );
+}
+
 /* ---------- Projects Section with Tabs ---------- */
 type WebProject = {
   title: string;
@@ -794,12 +794,16 @@ type WebProject = {
 
 type MobileProject = {
   title: string;
+  tagline: string;
   description: string;
-  status: "placeholder" | "live";
-  icon: LucideIcon;
+  image: string;
+  downloads: string;
+  rating: number;
+  playStoreLink?: string;
+  appStoreLink?: string;
   tags: string[];
-  gradient: string;
-  accentColor: string;
+  accentGradient: string;
+  backdrop: string;
 };
 
 function ProjectsSection() {
@@ -812,17 +816,17 @@ function ProjectsSection() {
       description:
         "AI-powered virtual assistant platform delivering conversational intelligence, natural-language workflows, and secure enterprise integrations for knowledge-heavy teams.",
       link: "#",
-      image: "/placeholder.svg",
+      image: "/aiva.jpg",
       tags: ["Next.js", "Node.js", "OpenAI", "PostgreSQL", "Redis", "AWS", "WebSockets"],
       gradient: "from-violet-500 to-fuchsia-500",
     },
     {
-      title: "Telehealth Platform",
+      title: "MyDoctor Portugal",
       description:
-        "HIPAA-aware telehealth platform enabling video consultations, e-prescriptions, scheduling, and patient records with end-to-end encrypted communication.",
-      link: "#",
-      image: "/placeholder.svg",
-      tags: ["Laravel", "Next.js", "WebRTC", "Twilio", "Stripe", "PostgreSQL", "AWS"],
+        "Telehealth platform connecting patients across Portugal with licensed physicians — secure video consultations, online prescriptions, scheduling, chronic-care coordination, and GDPR-compliant patient records.",
+      link: "https://mydoctorportugal.com/",
+      image: "/mydoctorportugal.png",
+      tags: ["Next.js", "Laravel", "WebRTC", "Twilio", "Stripe", "PostgreSQL", "AWS", "GDPR"],
       gradient: "from-emerald-500 to-teal-500",
     },
     {
@@ -892,44 +896,46 @@ function ProjectsSection() {
 
   const mobileProjects: MobileProject[] = [
     {
-      title: "Healthcare Companion",
+      title: "School Hack",
+      tagline: "AI-powered educational companion",
       description:
-        "Cross-platform mobile app for medication tracking, appointment reminders, and secure chat with care teams.",
-      status: "placeholder",
-      icon: HeartPulse,
-      tags: ["React Native", "Expo", "Node.js", "Push Notifications"],
-      gradient: "from-rose-500 to-pink-500",
-      accentColor: "text-rose-400",
+        "AI-powered educational app designed to give students an unprecedented level of knowledge — reach goals faster, learn smarter. With Docuchat, users talk directly to their documents to learn quickly and retain more information.",
+      image: "/apps/school-hack/hero.webp",
+      downloads: "1M+",
+      rating: 4.5,
+      playStoreLink: "https://play.google.com/store/apps/details?id=com.meets.schoolhack",
+      appStoreLink: "https://apps.apple.com/us/app/school-hack/id1667172863",
+      tags: ["React Native", "OpenAI", "Docuchat", "Smart Media", "Groups", "Quiz Room"],
+      accentGradient: "from-blue-600 via-indigo-600 to-slate-900",
+      backdrop: "from-slate-900 to-indigo-950",
     },
     {
-      title: "Fintech Wallet",
+      title: "Santra",
+      tagline: "Homemade food & sweets marketplace",
       description:
-        "Mobile-first wallet app with biometric auth, instant transfers, virtual cards, and real-time transaction analytics.",
-      status: "placeholder",
-      icon: BarChart3,
-      tags: ["Flutter", "Firebase", "Stripe", "Biometrics"],
-      gradient: "from-emerald-500 to-teal-500",
-      accentColor: "text-emerald-400",
+        "Marketplace where customers discover and order a curated selection of homemade food and sweets across the UAE. Exclusive offers, seamless checkout with secure card payments, reliable delivery, and verified chef reviews.",
+      image: "/apps/santra/hero.webp",
+      downloads: "50K+",
+      rating: 4.3,
+      playStoreLink: "https://play.google.com/store/apps/details?id=com.hihome.customer&hl=en",
+      appStoreLink: "https://apps.apple.com/ae/app/santra-%D8%B3%D9%86%D8%B7%D8%B1%D9%87/id1540775004",
+      tags: ["React Native", "Marketplace", "Stripe", "Multi-Vendor", "Geo Delivery", "Reviews"],
+      accentGradient: "from-fuchsia-600 via-purple-600 to-amber-500",
+      backdrop: "from-purple-950 to-fuchsia-950",
     },
     {
-      title: "AI Productivity",
+      title: "Konjac — Skinfood",
+      tagline: "AI skin analysis + skincare commerce",
       description:
-        "Smart productivity assistant with voice capture, AI summaries, and cross-device sync for executives on the move.",
-      status: "placeholder",
-      icon: Brain,
-      tags: ["React Native", "OpenAI", "Supabase", "Voice AI"],
-      gradient: "from-violet-500 to-indigo-500",
-      accentColor: "text-violet-400",
-    },
-    {
-      title: "Logistics Field App",
-      description:
-        "Driver & field-ops app with route optimization, offline-first capture, delivery proof, and live dispatch sync.",
-      status: "placeholder",
-      icon: Bell,
-      tags: ["React Native", "Mapbox", "SQLite", "Offline Sync"],
-      gradient: "from-amber-500 to-orange-500",
-      accentColor: "text-amber-400",
+        "One-stop destination for nature-powered skincare, with an AI-powered Skin Analysis feature. Whether targeting breakouts, dryness, sensitivity, or glow maintenance — formulas designed to work with your skin, not against it.",
+      image: "/apps/konjac/hero.webp",
+      downloads: "E-commerce",
+      rating: 4.6,
+      playStoreLink: "https://play.google.com/store/apps/details?id=com.konjac.skinfood.android&hl=en",
+      appStoreLink: "https://apps.apple.com/us/app/konjac-skinfood/id6740762164",
+      tags: ["React Native", "AI Skin Analysis", "E-commerce", "Stripe", "Personalization"],
+      accentGradient: "from-pink-500 via-rose-500 to-fuchsia-500",
+      backdrop: "from-rose-950 to-pink-950",
     },
   ];
 
@@ -988,7 +994,7 @@ function ProjectsSection() {
                   <WebProjectCard key={project.title} project={project} index={index} isVisible={isCardsVisible} />
                 ))}
               </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-8 border-t border-border/50">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8 border-t border-border/50">
                 {mobileProjects.map((project, index) => (
                   <MobileProjectCard key={project.title} project={project} index={index} isVisible={isCardsVisible} />
                 ))}
@@ -1004,14 +1010,11 @@ function ProjectsSection() {
             </TabsContent>
 
             <TabsContent value="mobile" className="mt-0">
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {mobileProjects.map((project, index) => (
                   <MobileProjectCard key={project.title} project={project} index={index} isVisible={isCardsVisible} />
                 ))}
               </div>
-              <p className="text-center text-muted-foreground text-sm mt-8 italic">
-                Mobile application case studies — shipping soon. Screens available on request.
-              </p>
             </TabsContent>
           </Tabs>
         </div>
@@ -1050,8 +1053,15 @@ function WebProjectCard({
           src={project.image || "/placeholder.svg"}
           alt={project.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
         />
         <div className="absolute inset-0 bg-black/25 group-hover:bg-black/5 transition-colors duration-500" />
+        {/* Fallback branding label — shows through when image is missing */}
+        <div className="absolute inset-0 flex items-end p-4 pointer-events-none">
+          <div className="text-white/95 text-lg font-bold drop-shadow-lg">{project.title}</div>
+        </div>
       </div>
       <CardHeader className="flex-1 flex flex-col">
         <div className="flex items-center justify-between mb-2">
@@ -1113,7 +1123,6 @@ function MobileProjectCard({
   isVisible: boolean;
 }) {
   const [shouldAnimateTags, setShouldAnimateTags] = useState(false);
-  const Icon = project.icon;
 
   useEffect(() => {
     if (isVisible) {
@@ -1129,49 +1138,51 @@ function MobileProjectCard({
       }`}
       style={{ animationDelay: isVisible ? `${0.2 + index * 0.1}s` : undefined }}
     >
-      {/* Phone mockup */}
-      <div className="relative pt-8 pb-4 flex justify-center bg-gradient-to-b from-muted/50 to-transparent">
-        <div className="phone-frame group-hover:scale-105 transition-transform duration-500 ease-out">
-          <div className="phone-notch" />
-          <div className={`phone-screen bg-gradient-to-br ${project.gradient} flex flex-col items-center justify-center p-4`}>
-            <div className="absolute inset-0 opacity-20">
-              <div className="grid-bg" style={{ backgroundSize: "16px 16px" }} />
-            </div>
-            <div className="relative flex flex-col items-center">
-              <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mb-3 ring-1 ring-white/20">
-                <Icon className="h-7 w-7 text-white" />
-              </div>
-              <div className="text-white/90 text-xs font-semibold text-center leading-tight px-2">
-                {project.title}
-              </div>
-              <div className="mt-3 flex flex-col gap-1.5 w-full px-2">
-                <div className="h-1.5 rounded-full bg-white/30 w-full" />
-                <div className="h-1.5 rounded-full bg-white/20 w-4/5" />
-                <div className="h-1.5 rounded-full bg-white/20 w-3/5" />
-              </div>
-            </div>
-          </div>
+      {/* Real screenshot — these assets already include a phone mockup */}
+      <div className={`relative flex justify-center items-end pt-8 overflow-hidden bg-gradient-to-br ${project.backdrop}`}>
+        <div className="absolute inset-0 opacity-30 pointer-events-none">
+          <div className="grid-bg" style={{ backgroundSize: "24px 24px" }} />
         </div>
+        <div
+          className={`absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-50 pointer-events-none bg-gradient-to-br ${project.accentGradient}`}
+        />
+        <img
+          src={project.image}
+          alt={`${project.title} — ${project.tagline}`}
+          className="relative z-10 w-full max-w-[260px] object-contain object-bottom transition-transform duration-700 ease-out group-hover:-translate-y-2 group-hover:scale-[1.03]"
+          loading="lazy"
+        />
       </div>
 
-      <CardHeader className="flex-1 flex flex-col pt-2">
-        <div className="flex items-center justify-between mb-2">
-          <CardTitle className="text-base group-hover:text-primary transition-colors">
-            {project.title}
-          </CardTitle>
-          <Badge variant="outline" className="border-accent/40 text-accent text-[10px]">
-            Preview
-          </Badge>
+      <CardHeader className="flex-1 flex flex-col pt-6">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div>
+            <CardTitle className="text-lg group-hover:text-primary transition-colors leading-tight">
+              {project.title}
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">{project.tagline}</p>
+          </div>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <div className="flex items-center gap-1 text-xs font-semibold text-foreground/80">
+              <Star className="h-3.5 w-3.5 text-yellow-400 fill-current" />
+              {project.rating.toFixed(1)}
+            </div>
+            <Badge variant="outline" className="border-primary/30 text-primary text-[10px] font-medium">
+              {project.downloads}
+            </Badge>
+          </div>
         </div>
+
         <CardDescription className="leading-relaxed mb-4 flex-1 text-sm">
           {project.description}
         </CardDescription>
-        <div className="flex flex-wrap gap-1.5">
+
+        <div className="flex flex-wrap gap-1.5 mb-4">
           {project.tags.map((tag, tagIndex) => (
             <Badge
               key={tag}
               variant="outline"
-              className={`text-[10px] border-primary/20 hover:bg-primary/10 transition-colors ${
+              className={`text-[10px] border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-colors ${
                 shouldAnimateTags ? "projects-tag-enter" : "opacity-0 scale-[0.8]"
               }`}
               style={{
@@ -1184,6 +1195,35 @@ function MobileProjectCard({
             </Badge>
           ))}
         </div>
+
+        {(project.playStoreLink || project.appStoreLink) && (
+          <div className="flex gap-2 mt-auto">
+            {project.playStoreLink && (
+              <a
+                href={project.playStoreLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${project.title} on Google Play`}
+                className="store-chip flex-1 inline-flex items-center justify-center gap-2 h-10 px-3 rounded-md text-xs font-semibold bg-foreground/5 border border-border hover:bg-foreground hover:text-background transition-all duration-300"
+              >
+                <GooglePlayIcon className="h-4 w-4 shrink-0" />
+                <span>Google Play</span>
+              </a>
+            )}
+            {project.appStoreLink && (
+              <a
+                href={project.appStoreLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${project.title} on App Store`}
+                className="store-chip flex-1 inline-flex items-center justify-center gap-2 h-10 px-3 rounded-md text-xs font-semibold bg-foreground/5 border border-border hover:bg-foreground hover:text-background transition-all duration-300"
+              >
+                <AppStoreIcon className="h-4 w-4 shrink-0" />
+                <span>App Store</span>
+              </a>
+            )}
+          </div>
+        )}
       </CardHeader>
     </Card>
   );
@@ -1195,6 +1235,12 @@ function ServicesSection() {
   const { isVisible: isCardsVisible, elementRef: cardsRef } = useScrollAnimation();
 
   const services = [
+    {
+      icon: Brain,
+      title: "AI Solutions Engineering",
+      description: "Designing and shipping AI-powered products — RAG assistants, LLM workflows, chatbots, and internal copilots wired into your existing stack.",
+      gradient: "from-violet-500 to-fuchsia-500",
+    },
     {
       icon: Code2,
       title: "Frontend Development",
@@ -1303,6 +1349,12 @@ function SkillsSection() {
   const { isVisible: isCardsVisible, elementRef: cardsRef } = useScrollAnimation();
 
   const skillGroups = [
+    {
+      category: "AI & LLM Engineering",
+      icon: Brain,
+      skills: ["OpenAI", "LangChain", "RAG", "Vector DBs", "Pinecone", "Embeddings", "Agents", "Prompt Design"],
+      color: "from-violet-500 to-fuchsia-500",
+    },
     {
       category: "Backend Development",
       icon: Server,
@@ -1464,10 +1516,11 @@ function AboutMeSection() {
                 isLeftVisible ? "about-fade-in-left about-stagger-1" : "opacity-0 translate-x-[-28px]"
               }`}
             >
-              I'm a <strong className="text-foreground">Senior Software Engineer</strong> with 5+ years of
-              experience designing and building web applications, APIs, and database-driven systems. My main focus
-              is backend engineering with Laravel/PHP and JavaScript (Node.js, NestJS), combined with modern
-              frontends in Vue.js and React.
+              I'm a <strong className="text-foreground">Solution Engineer</strong> with 7+ years of experience
+              designing and shipping scalable web platforms, mobile applications, and APIs. Today I partner with
+              businesses to build <strong className="text-foreground">AI-powered solutions</strong> — from RAG
+              assistants and workflow automation to LLM-backed internal tools — wired into Laravel, Node.js,
+              Next.js, and React Native stacks.
             </p>
 
             <p
@@ -1475,10 +1528,10 @@ function AboutMeSection() {
                 isLeftVisible ? "about-fade-in-left about-stagger-2" : "opacity-0 translate-x-[-28px]"
               }`}
             >
-              I've worked across logistics, healthcare, fintech, POS, and SaaS platforms — designing architectures,
-              optimising performance with Redis caching and query tuning, and implementing secure payment and wallet
-              flows. I'm comfortable owning features end-to-end: from requirements and system design to
-              implementation, testing, deployment, and production troubleshooting.
+              I've worked across healthcare, logistics, fintech, POS, and SaaS platforms — designing architectures,
+              optimising performance with Redis caching and query tuning, integrating OpenAI and vector databases,
+              and implementing secure payment and wallet flows. I own features end-to-end: requirements, system
+              design, implementation, testing, deployment, and production troubleshooting.
             </p>
 
             <p
@@ -1486,8 +1539,9 @@ function AboutMeSection() {
                 isLeftVisible ? "about-fade-in-left about-stagger-3" : "opacity-0 translate-x-[-28px]"
               }`}
             >
-              I enjoy leading and mentoring within small teams, reviewing code for quality, and collaborating closely
-              with product, QA, and stakeholders to ship reliable software that solves real business problems.
+              I lead and mentor small teams, review code for quality, and collaborate closely with product, QA, and
+              stakeholders to ship reliable software that solves real business problems — and increasingly, to
+              translate AI capabilities into measurable enterprise outcomes.
             </p>
 
             <div
@@ -1498,8 +1552,8 @@ function AboutMeSection() {
               <h3 className="text-xl font-semibold mb-4 text-foreground">Core Technologies</h3>
               <div className="flex flex-wrap gap-3">
                 {[
-                  "PHP", "WordPress", "Laravel", "CodeIgniter", "JavaScript", "Node.js", "Nest.js", "Next.js",
-                  "React.js", "Vue.js", "React Native", "Livewire", "Tailwind", "Docker", "AWS", "MySQL", "PostgreSQL",
+                  "OpenAI", "LangChain", "RAG", "Vector DBs", "PHP", "Laravel", "Node.js", "Nest.js", "Next.js",
+                  "React.js", "Vue.js", "React Native", "TypeScript", "Python", "Docker", "AWS", "PostgreSQL", "Redis",
                 ].map((tech, index) => (
                   <Badge
                     key={tech}
@@ -1517,11 +1571,25 @@ function AboutMeSection() {
               </div>
             </div>
 
-            <div className={isLeftVisible ? "about-fade-in-left about-stagger-5" : "opacity-0 translate-x-[-28px]"}>
-              <Button className="btn-gradient text-white group shadow-lg" asChild>
-                <a href="/Zeeshan Haider.pdf" download>
+            <div
+              className={`flex flex-wrap gap-3 ${
+                isLeftVisible ? "about-fade-in-left about-stagger-5" : "opacity-0 translate-x-[-28px]"
+              }`}
+            >
+              <Button className="btn-gradient group shadow-lg" asChild>
+                <a href="#contact">
+                  Get in Touch
+                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                className="outline-connect border border-primary/40 text-primary group"
+                asChild
+              >
+                <a href="/Zeeshan-Haider-Resume.pdf" download>
                   Download Resume
-                  <Download className="h-4 w-4 ml-2 group-hover:translate-y-1 transition-transform" />
+                  <Download className="h-4 w-4 ml-2 group-hover:translate-y-0.5 transition-transform" />
                 </a>
               </Button>
             </div>
@@ -1688,17 +1756,17 @@ export default function ZeeshanPortfolio() {
             <div className="hidden md:flex items-center space-x-3">
               <ThemeToggle />
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground bg-transparent transition-all duration-300"
+                className="outline-connect border border-primary/40 text-primary"
                 asChild
               >
-                <a href="/Zeeshan Haider.pdf" download>
+                <a href="/Zeeshan-Haider-Resume.pdf" download>
                   <Download className="h-4 w-4 mr-2" />
                   Resume
                 </a>
               </Button>
-              <Button size="sm" className="btn-gradient text-white shadow-lg">
+              <Button size="sm" className="btn-gradient shadow-lg" asChild>
                 <a href="#contact">Let's Connect</a>
               </Button>
             </div>
@@ -1726,14 +1794,19 @@ export default function ZeeshanPortfolio() {
                     {item}
                   </a>
                 ))}
-                <div className="flex space-x-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1 bg-transparent" asChild>
-                    <a href="/Zeeshan Haider.pdf" download>
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="outline-connect border border-primary/40 text-primary flex-1"
+                    asChild
+                  >
+                    <a href="/Zeeshan-Haider-Resume.pdf" download>
                       <Download className="h-4 w-4 mr-2" />
                       Resume
                     </a>
                   </Button>
-                  <Button size="sm" className="flex-1 btn-gradient text-white">
+                  <Button size="sm" className="flex-1 btn-gradient" asChild>
                     <a href="#contact">Hire Me</a>
                   </Button>
                 </div>
@@ -1763,25 +1836,26 @@ export default function ZeeshanPortfolio() {
               </h1>
 
               <p className="text-2xl text-foreground/90 mb-4 font-medium">
-                Senior Software Engineer · Web & Mobile
+                Solution Engineer · AI, Web & Mobile
               </p>
 
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-xl">
-                I architect and ship scalable web platforms, mobile applications, and APIs for enterprises — with
-                Laravel, Node.js, Next.js, React Native, and cloud-native infrastructure.
+                7+ years engineering scalable platforms for enterprises — now partnering with businesses to design and
+                ship AI-powered solutions on top of Laravel, Node.js, Next.js, React Native, and cloud-native
+                infrastructure.
               </p>
 
               <div className="flex flex-wrap gap-4 mb-8">
-                <Button size="lg" className="btn-gradient text-white group shadow-xl" asChild>
+                <Button size="lg" className="btn-gradient group shadow-xl" asChild>
                   <a href="#projects" className="flex items-center">
                     View My Work
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </a>
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="lg"
-                  className="border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground bg-transparent transition-all duration-300"
+                  className="outline-connect border border-primary/40 text-primary transition-all duration-300"
                   asChild
                 >
                   <a href="#contact">Let's Connect</a>
@@ -1834,7 +1908,7 @@ export default function ZeeshanPortfolio() {
 
                 {/* Floating Stats Cards */}
                 <div className="absolute -top-6 -right-6 glass-card rounded-2xl p-4 text-center shadow-xl float-1">
-                  <div className="text-2xl font-bold gradient-text">5+</div>
+                  <div className="text-2xl font-bold gradient-text">7+</div>
                   <div className="text-xs text-muted-foreground">Years Exp</div>
                 </div>
 
@@ -1858,7 +1932,7 @@ export default function ZeeshanPortfolio() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: Briefcase, value: "5+", label: "Years Experience", color: "from-blue-500 to-cyan-500" },
+              { icon: Briefcase, value: "7+", label: "Years Experience", color: "from-blue-500 to-cyan-500" },
               { icon: Code2, value: "30+", label: "Projects Completed", color: "from-indigo-500 to-violet-500" },
               { icon: Users, value: "25+", label: "Happy Clients", color: "from-emerald-500 to-teal-500" },
               { icon: Award, value: "98%", label: "Client Satisfaction", color: "from-rose-500 to-pink-500" },
@@ -1909,8 +1983,8 @@ export default function ZeeshanPortfolio() {
                 <h3 className="text-2xl font-bold gradient-text">Zeeshan Haider</h3>
               </div>
               <p className="text-muted-foreground mb-6 leading-relaxed max-w-md">
-                Senior Software Engineer crafting scalable web platforms, mobile applications, and meaningful digital
-                experiences for enterprises worldwide.
+                Solution Engineer with 7+ years of experience shipping AI-powered products, web platforms, and
+                mobile applications for enterprises worldwide.
               </p>
               <div className="flex space-x-3">
                 <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary" asChild>

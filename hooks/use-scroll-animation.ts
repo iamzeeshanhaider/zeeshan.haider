@@ -13,57 +13,38 @@ export function useScrollAnimation({
 }: UseScrollAnimationOptions = {}) {
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
-  const hasTriggeredRef = useRef(false);
 
   useEffect(() => {
-    let observer: IntersectionObserver | null = null;
-    let scrollHandler: (() => void) | null = null;
+    const node = elementRef.current;
+    if (!node) return;
 
-    const initTimeout = setTimeout(() => {
-      if (!elementRef.current) return;
+    // If the element is already inside the viewport on mount, reveal immediately.
+    // This is the common case for the first screens (hero, about, stats).
+    const rect = node.getBoundingClientRect();
+    const alreadyVisible =
+      rect.top < window.innerHeight && rect.bottom > 0;
+    if (alreadyVisible) {
+      setIsVisible(true);
+      if (triggerOnce) return;
+    }
 
-      const rect = elementRef.current.getBoundingClientRect();
-      const isInViewportOnLoad = rect.top >= 0 && rect.top < window.innerHeight && window.scrollY === 0;
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting && (!triggerOnce || !hasTriggeredRef.current)) {
-              hasTriggeredRef.current = true;
-              setIsVisible(true);
-            }
-          });
-        },
-        { threshold, rootMargin }
-      );
-
-      if (isInViewportOnLoad) {
-        scrollHandler = () => {
-          if (window.scrollY > 50 && !hasTriggeredRef.current && elementRef.current && observer) {
-            observer.observe(elementRef.current);
-            window.removeEventListener("scroll", scrollHandler!);
-            scrollHandler = null;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            if (triggerOnce) observer.disconnect();
+          } else if (!triggerOnce) {
+            setIsVisible(false);
           }
-        };
-        window.addEventListener("scroll", scrollHandler, { passive: true });
-      } else {
-        if (elementRef.current) {
-          observer.observe(elementRef.current);
-        }
-      }
-    }, 100);
+        });
+      },
+      { threshold, rootMargin }
+    );
 
-    return () => {
-      clearTimeout(initTimeout);
-      if (scrollHandler) {
-        window.removeEventListener("scroll", scrollHandler);
-      }
-      if (observer && elementRef.current) {
-        observer.unobserve(elementRef.current);
-      }
-    };
+    observer.observe(node);
+    return () => observer.disconnect();
   }, [threshold, rootMargin, triggerOnce]);
 
   return { isVisible, elementRef };
 }
-
